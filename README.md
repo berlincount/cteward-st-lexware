@@ -1,4 +1,4 @@
-st-flask-lexware
-================
+st-lexware
+==========
 
-Flask-based Storage Adapter to Lexware Vereinsverwaltung
+Flask-based Storage Adapter to Lexware Vereinsverwaltung for cteward

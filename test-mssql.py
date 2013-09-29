@@ -3,7 +3,7 @@
 import json
 import pymssql
 
-config = json.load(open('/etc/cteward/st-flask-lexware.json'))
+config = json.load(open('/etc/cteward/st-lexware.json'))
 
 conn = pymssql.connect(as_dict = True, **config['database'])
 cur = conn.cursor()
