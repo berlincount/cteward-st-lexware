@@ -3,7 +3,7 @@
     "host":       "localhost",
     "port":       1433,
     "user":       "readonly",
-    "password":   "REDACTED",
+    "password":   "da9oum7UVeiru1ah",
     "database":   "Linear"
   },
   "runner": {

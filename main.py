@@ -11,6 +11,7 @@ import json
 import os
 from flask import Flask
 from OpenSSL import SSL
+from flask.ext.ldap import LDAP
 
 import api
 from api.database import Database
@@ -20,6 +21,7 @@ import sys
 config = {}
 sslcontext = None
 app = None
+ldap = None
 
 def load_config():
   global config
@@ -67,8 +69,14 @@ def setup_flask():
   app = Flask('st-lexware')
   app.config.update(**config['flask'])
 
+def setup_ldap():
+  global app
+  global ldap
+  ldap = LDAP(app)
+
 def setup_api():
-  api.init(app, config=config['api'])
+  global app
+  api.init(app, config['api'])
 
 def run_app():
   global app
@@ -80,5 +88,6 @@ if __name__ == '__main__':
   setup_ssl()
   setup_database()
   setup_flask()
+  setup_ldap()
   setup_api()
   run_app()

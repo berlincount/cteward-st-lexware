@@ -6,11 +6,56 @@ provides legacy access to Lexware's data
 
 import string
 from datetime import datetime
-from flask import Response
+from flask import request, Response
 from flask.ext import restful
-from flask.ext.httpauth import HTTPBasicAuth
-
 from api.database import Database
+from functools import wraps
+import ldap
+
+def set_access(new_access):
+  """set username & password list"""
+  global access
+  access = new_access
+
+
+def check_auth(username, password):
+  """This function is called to check if a username /
+  password combination is valid.
+  """
+  global access
+  if username in access:
+    if access[username] == password:
+      return True
+  try:
+    l = ldap.initialize('ldap://10.0.1.7')
+    try:
+      l.bind_s('uid=%s,ou=crew,dc=c-base,dc=org' % username, password)
+    except ldap.INVALID_CREDENTIALS:
+      return False
+    finally:
+      l.unbind()
+    return True
+  except Exception as e:
+    print e
+    return False
+  return False
+
+def authenticate():
+  """Sends a 401 response that enables basic auth"""
+  return Response(
+    'Could not verify your access level for that URL.\n'
+    'You have to login with proper credentials', 401,
+    {'WWW-Authenticate': 'Basic realm="Login Required"'})
+
+def requires_auth(f):
+  @wraps(f)
+  def decorated(*args, **kwargs):
+    auth = request.authorization
+    if not auth or not check_auth(auth.username, auth.password):
+      return authenticate()
+    return f(*args, **kwargs)
+  return decorated
+
 
 class Monitor(restful.Resource):
   """test overall availability end-to-end"""
@@ -20,24 +65,7 @@ class Monitor(restful.Resource):
 
 class MemberList(restful.Resource):
   """fetch memberlist from database after authorization"""
-  access = {}
-  """dict with username -> password mapping"""
-  auth   = HTTPBasicAuth()
-  """flask.ext.httpauth object handling authentication"""
-
-  @auth.get_password
-  def get_password(username):
-    """fetch password from internal dict"""
-    if username in MemberList.access:
-      return MemberList.access[username]
-    return None
-
-  @staticmethod
-  def set_access(access):
-    """set username & password list"""
-    MemberList.access = access
-
-  @auth.login_required
+  @requires_auth
   def get(self):
     members = Database.getmembers()
     return members
@@ -55,7 +83,7 @@ class MemberListCSV(MemberList):
   ]
   """filtered field list with legacy order"""
 
-  @MemberList.auth.login_required
+  @requires_auth
   def dispatch_request(self):
     output = ""
     for num, key in enumerate(MemberListCSV.keys):
@@ -66,13 +94,13 @@ class MemberListCSV(MemberList):
       if num:
         output += ';'
       output += key
-    output += "\n"
 
     # fetch list of data from MemberList parent
     members = super(MemberListCSV, self).get()
 
     # output every member
     for member in members:
+      output += "\n"
       # ignore empty/misconfigured members
       if member['Crewname'] is None or member['Crewname'] == '':
         continue
@@ -93,10 +121,16 @@ class MemberListCSV(MemberList):
             date_trimmed   = date_formatted.replace('.0','.',1).replace(' ','')
             member[key] = date_trimmed
           output += member[key]
-      output += "\n"
 
     resp = Response(response=output,
                     status=200,
                     mimetype="text/csv")
 
+    output += "\n"
     return resp
+
+class Members(MemberList):
+  @requires_auth
+  def get(self):
+    members = super(Members, self).get()
+    return [member for member in members if member['Crewname'] == request.authorization.username]
