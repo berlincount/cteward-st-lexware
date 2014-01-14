@@ -59,9 +59,8 @@ def requires_auth(f):
 
 class Monitor(restful.Resource):
   """test overall availability end-to-end"""
-  # FIXME: implementation?!?
   def get(self):
-    return {'status': 'OK'}
+    return {'status': 'OK' if Database.ping() else 'BROKEN'}
 
 class MemberList(restful.Resource):
   """fetch memberlist from database after authorization"""
@@ -79,6 +78,7 @@ class MemberListCSV(MemberList):
     'Status',
     'Ext_Mail',
     'Eintritt',
+    'Paten',
     'Weiteres'
   ]
   """filtered field list with legacy order"""
@@ -120,6 +120,8 @@ class MemberListCSV(MemberList):
             # -> '5.9.2013'
             date_trimmed   = date_formatted.replace('.0','.',1).replace(' ','')
             member[key] = date_trimmed
+          if key == 'Paten':
+            member[key] = string.join(member[key], ',')
           output += member[key]
 
     resp = Response(response=output,

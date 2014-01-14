@@ -6,7 +6,8 @@ data normalization.
 """
 
 import pymssql
-from datetime import datetime, date
+from datetime import datetime, timedelta, date
+from string import strip, split
 
 class Database:
   database = None
@@ -25,12 +26,21 @@ class Database:
     Database.database = pymssql.connect(charset = 'ISO-8859-15', as_dict = True, **config)
 
   @staticmethod
+  def ping():
+    # for monitoring
+    cur = Database.database.cursor()
+    cur.execute("SELECT Nachname,Vorname,Kurzname,Kennung3,Telefon3,Eintritt,Austritt FROM Adresse ORDER BY Nachname")
+    result = cur.fetchall()
+    cur.close()
+    return len(result) >= 7
+
+  @staticmethod
   def getmembers():
     """get list of members in legacy form, as a dict"""
     cur = Database.database.cursor()
     # request relevant data from Lexware
     # DATETIME is converted to ISO date string on server side
-    cur.execute("SELECT AdrNr,Firma4 AS Firma,Nachname,Vorname,Kurzname AS Crewname,Kennung3 AS Rohstatus,Telefon3 AS Ext_Mail,CONVERT(VARCHAR(8),Eintritt,112) AS Eintritt,CONVERT(VARCHAR(8),Austritt,112) AS Austritt FROM Adresse ORDER BY Nachname")
+    cur.execute("SELECT AdrNr,Firma4 AS Firma,Nachname,Vorname,Kurzname AS Crewname,Kennung3 AS Rohstatus,Telefon3 AS Ext_Mail,Kontaktwoher AS Paten,CONVERT(VARCHAR(8),Eintritt,112) AS Eintritt,CONVERT(VARCHAR(8),Austritt,112) AS Austritt FROM Adresse ORDER BY Nachname")
     members = cur.fetchall()
 
     # list of crew names, for tracking duplicates
@@ -58,9 +68,8 @@ class Database:
       if member['Austritt'] is not None:
         # extract datetime object from string
         austritt = datetime.strptime(member['Austritt'], '%Y%m%d')
-        # honor end date
-        # FIXME: need to add 24h to end at end of day
-        if austritt < datetime.now():
+        # honor end date (current day is inclusive)
+        if austritt < (datetime.now() + timedelta(1)):
           if status == 'crew':
             status = 'ex-crew'
           elif status == 'passiv':
@@ -82,5 +91,15 @@ class Database:
 
       # store REAL status in dict
       member['Status'] = status
+
+      # turn Paten-list into array
+      if member['Paten'] is None:
+        member['Paten'] = []
+      elif isinstance(member['Paten'], unicode):
+        if member == '':
+          member['Paten'] = []
+        else:
+          patenlist = member['Paten'].split(',')
+          member['Paten'] = map(strip, patenlist)
 
     return members
