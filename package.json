@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "mssql": "~0.5.3",
+    "restify": "~2.8.1",
+    "restify-oauth2": "~4.0.0",
+    "fast-csv": "~0.4.1",
+    "bunyan": "~0.23.1"
+  }
+}
