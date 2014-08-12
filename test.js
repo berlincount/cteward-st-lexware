@@ -1,7 +1,19 @@
-var restify = require('restify');
-var sql     = require('mssql');
-var csv     = require('fast-csv');
-var bunyan  = require('bunyan');
+var fs      = require('fs')        // Filesystem access
+var restify = require('restify');  // RESTful server
+var sql     = require('mssql');    // Microsoft SQL access
+var csv     = require('fast-csv'); // CSV generation
+var bunyan  = require('bunyan');   // Logging
+
+var configfile = process.env.CTEWARD_ST_LEXWARE_CONFIG || '/etc/cteward/st-lexware.json';
+var configstr  = '{ "mssql": {}, "server": {} }';
+try {
+  configstr  = fs.readFileSync(configfile,'utf-8');
+} catch(e) {
+  console.log("Can't load configfile '" + configfile + "': " +e);
+}
+var config     = JSON.parse(configstr);
+if (!config.mssql)  config.mssql  = {};
+if (!config.server) config.server = {};
 
 function realstatus(rohstatus) {
     return rohstatus;
@@ -11,29 +23,41 @@ function backendOkay(next) {
     var numMembers;
     var numDuplicates;
     var request = new sql.Request();
-    request.query('SELECT COUNT(*) AS MemberCount FROM Adresse', function(err, recordset) {
+    result = request.query('SELECT COUNT(*) AS MemberCount FROM Adresse', function(err, recordset) {
+        console.log("X1");
         console.log(err);
-        if (err) next(new Error('Database access failed (#1).'));
-        if (recordset[0].MemberCount < 7) next(new Error('Too few members.'));
+        console.log("X2");
+        if (err) return next(new Error('Database access failed (#1).'));
+        if (recordset[0].MemberCount < 7) return next(new Error('Too few members.'));
+        return 1;
     });
+    console.log("Z1");
+    console.log(result);
+    console.log("Z2");
     request.query('SELECT Kurzname AS Crewname,COUNT(*) FROM Adresse GROUP BY Kurzname HAVING COUNT(*) > 1', function(err, recordset) {
+        console.log("Y1");
         console.log(err);
-        if (err) next(new Error('Database access failed (#2).'));
-        if (recordset.length > 0) next(new Error('Duplicate membernames.'));
+        console.log("Y2");
+        if (err) return next(new Error('Database access failed (#2).'));
+        if (recordset.length > 0) return next(new Error('Duplicate membernames.'));
+        return 1;
     });
-    next(true);
+    console.log("G1");
+    console.log(result);
+    console.log("G2");
+    return next(true);
 }
 
 var log = bunyan.createLogger({
     name: 'cteward-st-lexware',
-    level: 'trace'
+    level: config.loglevel || 'trace'
 });
 
 var connection = new sql.Connection({
-    user: 'readonly',
-    password: 'XXXXXXXXXXXXXXXX',
-    server: 'localhost',
-    database: 'Linear'
+    user:     config.mssql.user     || 'readonly',
+    password: config.mssql.password || 'XXXXXXXXXXXXXXXX',
+    server:   config.mssql.server   || 'localhost',
+    database: config.mssql.database || 'Linear'
 });
 
 var server = restify.createServer({
@@ -52,19 +76,19 @@ server.pre(restify.pre.userAgentConnection());
 server.get('/legacy/monitor', function legacyMonitor(req, res, next) {
     backendOkay(function legacyMonitorBackendAnswer(result) {
         if (result instanceof Error) {
-            next(result);
+            return next(result);
         } else if (result)
             res.send({'status': 'OK'});
         else
             res.send({'status': 'BROKEN'});
-        next();
+        return next();
     });
 });
 
 server.get('/legacy/memberlist', function memberlist(req, res, next) {
     // TODO: memberlist answer
     console.log("TODO: memberlist answer");
-    next(Error("TODO: memberlist answer"));
+    return next(Error("TODO: memberlist answer"));
 });
 server.get('/legacy/memberlist-oldformat', function memberlist_oldformat(req, res, next) {
     var request = new sql.Request();
@@ -88,10 +112,10 @@ server.get('/legacy/memberlist-oldformat', function memberlist_oldformat(req, re
                 };
             }
         });
-        next();
+        return next();
     });
 });
 
-server.listen(14333, function() {
+server.listen(config.server.bind || 14333, function() {
   console.log('%s listening at %s', server.name, server.url);
 });
