@@ -62,6 +62,8 @@ server.get('/legacy/memberlist-oldformat', function memberlist_oldformat(req, re
       csv.writeToStream(res, recordset, {
         headers: true,
         delimiter: ';',
+        rowDelimiter: '\n',
+        includeEndRowDelimiter: true,
         transform: function transform_row(row) {
           // IN:  AdrNr;Firma;Nachname;Vorname;Crewname;Rohstatus;Ext_Mail;Paten;Eintritt;Austritt
           // OUT: Nachname;Vorname;Crewname;Status;externe E-Mail;Eintritt;Paten;Weiteres
