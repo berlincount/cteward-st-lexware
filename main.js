@@ -1,8 +1,9 @@
-var fs       = require('fs');             // Filesystem access
-var restify  = require('restify');        // RESTful server
-var csv      = require('fast-csv');       // CSV generation
-var bunyan   = require('bunyan');         // Logging
-var database = require('./lib/database'); // Our database access module
+var fs         = require('fs');               // Filesystem access
+var restify    = require('restify');          // RESTful server
+var csv        = require('fast-csv');         // CSV generation
+var bunyan     = require('bunyan');           // Logging
+var database   = require('./lib/database');   // Our database access module
+var memberdata = require('./lib/memberdata'); // Our memberdata conversion module
 
 var configfile = process.env.CTEWARD_ST_LEXWARE_CONFIG || '/etc/cteward/st-lexware.json';
 var configstr  = '{ "mssql": {}, "server": {} }';
@@ -32,11 +33,6 @@ database.init(config.mssql);
 // handle cURL Connection: keep-alive
 server.pre(restify.pre.userAgentConnection());
 
-// status conversion helper functions
-function realstatus(rohstatus) {
-    return rohstatus;
-}
-
 server.get('/legacy/monitor', function legacyMonitor(req, res, next) {
   database.checkBackendOkay(function legacyMonitorBackendAnswer(err, result) {
   if (err) {
@@ -63,7 +59,6 @@ server.get('/legacy/memberlist-oldformat', function memberlist_oldformat(req, re
         headers: true,
         delimiter: ';',
         rowDelimiter: '\n',
-        includeEndRowDelimiter: true,
         transform: function transform_row(row) {
           // IN:  AdrNr;Firma;Nachname;Vorname;Crewname;Rohstatus;Ext_Mail;Paten;Eintritt;Austritt
           // OUT: Nachname;Vorname;Crewname;Status;externe E-Mail;Eintritt;Paten;Weiteres
@@ -71,10 +66,10 @@ server.get('/legacy/memberlist-oldformat', function memberlist_oldformat(req, re
             'Nachname':       row.Nachname,
             'Vorname':        row.Vorname,
             'Crewname':       row.Crewname,
-            'Status':         realstatus(row.Rohstatus),
+            'Status':         memberdata.realstatus(row),
             'externe E-Mail': row.Ext_Mail,
-            'Eintritt':       row.Eintritt,
-            'Paten':          row.Paten,
+            'Eintritt':       memberdata.datum(row.Eintritt),
+            'Paten':          memberdata.cleanpaten(row.Paten),
             'Weiteres':       ''
           };
         }

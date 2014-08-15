@@ -1,8 +1,10 @@
 {
   "dependencies": {
-    "restify": "2.8.x",
-    "mssql": "1.1.x",
-    "fast-csv": "0.4.x",
-    "bunyan": "1.0.x"
+    "restify": "~2.8.2",
+    "mssql": "~1.1.1",
+    "fast-csv": "~0.4.3",
+    "bunyan": "~1.0.0",
+    "micro-strptime": "~0.2.1",
+    "trim": "0.0.1"
   }
 }
