@@ -1,9 +1,10 @@
-var fs         = require('fs');               // Filesystem access
-var restify    = require('restify');          // RESTful server
-var csv        = require('fast-csv');         // CSV generation
-var bunyan     = require('bunyan');           // Logging
-var database   = require('./lib/database');   // Our database access module
-var memberdata = require('./lib/memberdata'); // Our memberdata conversion module
+var fs           = require('fs');                 // Filesystem access
+var restify      = require('restify');            // RESTful server
+var csv          = require('fast-csv');           // CSV generation
+var bunyan       = require('bunyan');             // Logging
+var database     = require('./lib/database');     // Our database access module
+var memberdata   = require('./lib/memberdata');   // Our memberdata conversion module
+var authprovider = require('./lib/authprovider'); // Authentication provider data
 
 var configfile = process.env.CTEWARD_ST_LEXWARE_CONFIG || '/etc/cteward/st-lexware.json';
 var configstr  = '{ "mssql": {}, "server": {} }';
@@ -18,7 +19,7 @@ if (!config.server) config.server = {};
 
 var log = bunyan.createLogger({
   name: 'cteward-st-lexware',
-  level: config.loglevel || 'trace'
+  level: config.loglevel || 'info'
 });
 
 var server = restify.createServer({
@@ -32,6 +33,12 @@ database.init(config.mssql);
 
 // handle cURL Connection: keep-alive
 server.pre(restify.pre.userAgentConnection());
+
+// handle authentication, compression, logging & CORS
+server.use(restify.authorizationParser());
+server.use(restify.gzipResponse());
+server.use(restify.requestLogger());
+server.use(restify.CORS());
 
 server.get('/legacy/monitor', function legacyMonitor(req, res, next) {
   database.checkBackendOkay(function legacyMonitorBackendAnswer(err, result) {
@@ -48,9 +55,17 @@ server.get('/legacy/monitor', function legacyMonitor(req, res, next) {
 server.get('/legacy/memberlist', function memberlist(req, res, next) {
   // TODO: memberlist answer
   console.log("TODO: memberlist answer");
-  return next(Error("TODO: memberlist answer"));
+  return next(new Error("TODO: memberlist answer"));
 });
 server.get('/legacy/memberlist-oldformat', function memberlist_oldformat(req, res, next) {
+  // FIXME: this will become asynchronouse in the long (OAuth2) run
+  if (req.authorization.scheme === undefined) {
+    return next(new restify.errors.UnauthorizedError("Permission denied."));
+  }
+  if (!authprovider.permitted(config, req)) {
+    return next(new restify.errors.NotAuthorizedError("Permission denied."));
+  }
+
   memberlist = database.getMemberList(function memberlist_csv(err, recordset) {
     if (err) {
       return next(err);
