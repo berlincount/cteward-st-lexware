@@ -1,10 +1,9 @@
 var fs           = require('fs');                 // Filesystem access
 var restify      = require('restify');            // RESTful server
-var csv          = require('fast-csv');           // CSV generation
 var bunyan       = require('bunyan');             // Logging
 var database     = require('./lib/database');     // Our database access module
-var memberdata   = require('./lib/memberdata');   // Our memberdata conversion module
 var authprovider = require('./lib/authprovider'); // Authentication provider data
+var legacy       = require('./lib/legacy'); // Authentication provider data
 
 var configfile = process.env.CTEWARD_ST_LEXWARE_CONFIG || '/etc/cteward/st-lexware.json';
 var configstr  = '{ "mssql": {}, "server": {} }';
@@ -40,24 +39,8 @@ server.use(restify.gzipResponse());
 server.use(restify.requestLogger());
 server.use(restify.CORS());
 
-server.get('/legacy/monitor', function legacyMonitor(req, res, next) {
-  database.checkBackendOkay(function legacyMonitorBackendAnswer(err, result) {
-  if (err) {
-    return next(err);
-  } else if (result)
-    res.send({'status': 'OK'});
-  else
-    res.send({'status': 'BROKEN'});
-  return next();
-  });
-});
-
-server.get('/legacy/memberlist', function memberlist(req, res, next) {
-  // TODO: memberlist answer
-  console.log("TODO: memberlist answer");
-  return next(new Error("TODO: memberlist answer"));
-});
-server.get('/legacy/memberlist-oldformat', function memberlist_oldformat(req, res, next) {
+server.get('/legacy/monitor',              legacy.monitor);
+server.get('/legacy/memberlist-oldformat', function auth_memberlist_oldformat(req, res, next) {
   // FIXME: this will become asynchronouse in the long (OAuth2) run
   if (req.authorization.scheme === undefined) {
     return next(new restify.errors.UnauthorizedError("Permission denied."));
@@ -65,33 +48,7 @@ server.get('/legacy/memberlist-oldformat', function memberlist_oldformat(req, re
   if (!authprovider.permitted(config, req)) {
     return next(new restify.errors.NotAuthorizedError("Permission denied."));
   }
-
-  memberlist = database.getMemberList(function memberlist_csv(err, recordset) {
-    if (err) {
-      return next(err);
-    } else {
-      csv.writeToStream(res, recordset, {
-        headers: true,
-        delimiter: ';',
-        rowDelimiter: '\n',
-        transform: function transform_row(row) {
-          // IN:  AdrNr;Firma;Nachname;Vorname;Crewname;Rohstatus;Ext_Mail;Paten;Eintritt;Austritt
-          // OUT: Nachname;Vorname;Crewname;Status;externe E-Mail;Eintritt;Paten;Weiteres
-          return {
-            'Nachname':       row.Nachname,
-            'Vorname':        row.Vorname,
-            'Crewname':       row.Crewname,
-            'Status':         memberdata.realstatus(row),
-            'externe E-Mail': row.Ext_Mail,
-            'Eintritt':       memberdata.datum(row.Eintritt),
-            'Paten':          memberdata.cleanpaten(row.Paten),
-            'Weiteres':       ''
-          };
-        }
-      });
-    }
-    return next();
-  });
+  legacy.memberlist_oldformat(req, res, next);
 });
 
 server.listen(config.server.bind || 14333, function() {
