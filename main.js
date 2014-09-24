@@ -3,7 +3,8 @@ var restify      = require('restify');            // RESTful server
 var bunyan       = require('bunyan');             // Logging
 var database     = require('./lib/database');     // Our database access module
 var authprovider = require('./lib/authprovider'); // Authentication provider data
-var legacy       = require('./lib/legacy'); // Authentication provider data
+var legacy       = require('./lib/legacy');       // Legacy format access
+var member       = require('./lib/member');       // Member access
 
 var configfile = process.env.CTEWARD_ST_LEXWARE_CONFIG || '/etc/cteward/st-lexware.json';
 var configstr  = '{ "mssql": {}, "server": {} }';
@@ -45,10 +46,21 @@ server.get('/legacy/memberlist-oldformat', function auth_memberlist_oldformat(re
   if (req.authorization.scheme === undefined) {
     return next(new restify.errors.UnauthorizedError("Permission denied."));
   }
-  if (!authprovider.permitted(config, req)) {
+  if (!authprovider.permitted(config, req, 'oldformat')) {
     return next(new restify.errors.NotAuthorizedError("Permission denied."));
   }
   legacy.memberlist_oldformat(req, res, next);
+});
+
+server.get('/member/:id', function auth_member(req, res, next) {
+  // FIXME: this will become asynchronouse in the long (OAuth2) run
+  if (req.authorization.scheme === undefined) {
+    return next(new restify.errors.UnauthorizedError("Permission denied."));
+  }
+  if (!authprovider.permitted(config, req, 'member', req.params.id)) {
+    return next(new restify.errors.NotAuthorizedError("Permission denied."));
+  }
+  member.get(req, res, next);
 });
 
 server.listen(config.server.bind || 14333, function() {
