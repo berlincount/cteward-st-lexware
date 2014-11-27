@@ -46,13 +46,13 @@ server.get('/legacy/memberlist-oldformat', function auth_memberlist_oldformat(re
   if (req.authorization.scheme === undefined) {
     return next(new restify.errors.UnauthorizedError("Permission denied."));
   }
-  if (!authprovider.permitted(config, req, 'oldformat')) {
+  if (!authprovider.permitted(config, req, 'memberlist')) {
     return next(new restify.errors.NotAuthorizedError("Permission denied."));
   }
   legacy.memberlist_oldformat(req, res, next);
 });
 
-server.get('/member/:id', function auth_member(req, res, next) {
+server.get('/legacy/member/:id', function auth_member(req, res, next) {
   // FIXME: this will become asynchronouse in the long (OAuth2) run
   if (req.authorization.scheme === undefined) {
     return next(new restify.errors.UnauthorizedError("Permission denied."));
@@ -61,6 +61,51 @@ server.get('/member/:id', function auth_member(req, res, next) {
     return next(new restify.errors.NotAuthorizedError("Permission denied."));
   }
   member.get(req, res, next);
+});
+
+
+server.get('/legacy/member/:id/raw', function auth_member(req, res, next) {
+  // FIXME: this will become asynchronouse in the long (OAuth2) run
+  if (req.authorization.scheme === undefined) {
+    return next(new restify.errors.UnauthorizedError("Permission denied."));
+  }
+  if (!authprovider.permitted(config, req, 'member-raw', req.params.id)) {
+    return next(new restify.errors.NotAuthorizedError("Permission denied."));
+  }
+  member.getRaw(req, res, next);
+});
+
+server.get('/legacy/member/:id/contract/:contract', function auth_member(req, res, next) {
+  // FIXME: this will become asynchronouse in the long (OAuth2) run
+  if (req.authorization.scheme === undefined) {
+    return next(new restify.errors.UnauthorizedError("Permission denied."));
+  }
+  if (!authprovider.permitted(config, req, 'member-contract', req.params.id)) {
+    return next(new restify.errors.NotAuthorizedError("Permission denied."));
+  }
+  member.getContract(req, res, next);
+});
+
+server.get('/legacy/member/:id/debit/:debit', function auth_member(req, res, next) {
+  // FIXME: this will become asynchronouse in the long (OAuth2) run
+  if (req.authorization.scheme === undefined) {
+    return next(new restify.errors.UnauthorizedError("Permission denied."));
+  }
+  if (!authprovider.permitted(config, req, 'member-debit', req.params.id)) {
+    return next(new restify.errors.NotAuthorizedError("Permission denied."));
+  }
+  member.getDebit(req, res, next);
+});
+
+server.get('/legacy/member/:id/withdrawal/:withdrawal', function auth_member(req, res, next) {
+  // FIXME: this will become asynchronouse in the long (OAuth2) run
+  if (req.authorization.scheme === undefined) {
+    return next(new restify.errors.UnauthorizedError("Permission denied."));
+  }
+  if (!authprovider.permitted(config, req, 'member-withdrawal', req.params.id)) {
+    return next(new restify.errors.NotAuthorizedError("Permission denied."));
+  }
+  member.getWithdrawal(req, res, next);
 });
 
 server.listen(config.server.bind || 14333, function() {
