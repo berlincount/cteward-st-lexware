@@ -1,0 +1,14 @@
+{
+    "mssql": {
+        "password": "faked",
+        "fakedata": true
+    },
+    "auth": {
+        "/legacy/*": {
+            "count": "dummytest"
+        }
+    },
+    "server": {
+        "bind": 14334
+    }
+}
