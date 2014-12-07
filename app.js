@@ -1,2 +1,2 @@
-var startup = require('./src/startup');
+var startup = require('./lib/startup');
 startup.startup();
