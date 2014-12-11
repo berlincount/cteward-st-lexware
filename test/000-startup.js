@@ -8,10 +8,8 @@ sqlconnection = sinon.stub(sql, 'Connection');
 sqlconnection.prototype.connect = function (foo) { foo(false); };
 
 before(function(done) {
+  Promise = global.Promise || require('bluebird');
   process.env.CTEWARD_ST_LEXWARE_CONFIG = 'st-lexware-test.json';
-  if (process.env.CTEWARD_COV == 1)
-    require('../lib-cov/startup').startup();
-  else
-    require('../lib/startup').startup();
+  require('../lib/startup').startup();
   done();
 });

@@ -1,9 +1,23 @@
+REPORTER = spec
 test:
-	npm test
+	@$(MAKE) lint
+	@echo TRAVIS_JOB_ID $(TRAVIS_JOB_ID)
+	@NODE_ENV=test ./node_modules/.bin/mocha -b --reporter $(REPORTER)
 
-coverage:
-	jscoverage --no-highlight lib lib-cov
-	CTEWARD_COV=1 mocha -r should -R html-cov > coverage.html
-	rm -rf lib-cov
+lint:
+	./node_modules/.bin/jshint ./lib ./test ./app.js
+
+test-cov:
+	$(MAKE) lint
+	@NODE_ENV=test ./node_modules/.bin/mocha \
+		--require blanket \
+		--reporter html-cov > coverage.html
+
+test-coveralls:
+	$(MAKE) lint
+	@NODE_ENV=test ./node_modules/.bin/mocha \
+		--require blanket \
+		--reporter mocha-lcov-reporter | ./node_modules/coveralls/bin/coveralls.js
+
 
 .PHONY: test
