@@ -13,11 +13,11 @@ test-cov:
 		--require blanket \
 		--reporter html-cov > coverage.html
 
-test-coveralls:
+test-cov-travis:
 	$(MAKE) lint
 	@NODE_ENV=test ./node_modules/.bin/mocha \
 		--require blanket \
-		--reporter mocha-lcov-reporter | ./node_modules/coveralls/bin/coveralls.js
+		--reporter travis-cov
 
 
 .PHONY: test
