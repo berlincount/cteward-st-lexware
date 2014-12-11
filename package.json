@@ -33,7 +33,7 @@
   },
   "config": {
     "blanket": {
-      "pattern": "lib"
+      "pattern": "/lib/"
     }
   }
 }
