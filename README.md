@@ -2,7 +2,6 @@
 
 [![Build Status][travis-image]][travis-url]
 [![Dependency Status][gemnasium-image]][gemnasium-url]
-[![Coverage Status][coveralls-image]][coveralls-url]
 
 [travis-image]: https://secure.travis-ci.org/berlincount/cteward-st-lexware.svg?branch=nodejs
 [travis-url]: https://travis-ci.org/berlincount/cteward-st-lexware
@@ -10,6 +9,7 @@
 [gemnasium-image]: https://gemnasium.com/berlincount/cteward-st-lexware.png
 [gemnasium-url]: https://gemnasium.com/berlincount/cteward-st-lexware
 
-[coveralls-image]: https://img.shields.io/coveralls/berlincount/cteward-st-lexware/nodejs.svg
-[coveralls-url]: https://coveralls.io/r/berlincount/cteward-st-lexware?branch=nodejs
+cteward is a federated open source management software in development.
 
+This code provides a read-only storage-backend reading directly from the
+Microsoft SQL server behind the Software "Lexware Vereinsverwaltung Premium".
