@@ -33,7 +33,8 @@
   },
   "config": {
     "blanket": {
-      "pattern": "/lib/"
+      "pattern": "lib",
+      "data-cover-never": "node_modules"
     },
     "travis-cov": {
       "threshold": 0
