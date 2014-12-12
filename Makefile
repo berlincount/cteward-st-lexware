@@ -10,11 +10,16 @@ test-cov: test
 		--require blanket \
 		--reporter html-cov > coverage.html
 
-test-cov-travis: test
+test-cov-coveralls: test
+	@echo TRAVIS_JOB_ID $(TRAVIS_JOB_ID)
+	@NODE_ENV=test ./node_modules/.bin/mocha \
+		--require blanket \
+		--reporter mocha-lcov-reporter | ./node_modules/coveralls/bin/coveralls.js
+
+test-cov-travis: test-cov-coveralls
 	@echo TRAVIS_JOB_ID $(TRAVIS_JOB_ID)
 	@NODE_ENV=test ./node_modules/.bin/mocha \
 		--require blanket \
 		--reporter travis-cov
-
 
 .PHONY: test
