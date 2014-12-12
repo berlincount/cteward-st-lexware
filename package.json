@@ -9,7 +9,7 @@
     "url": "https://github.com/berlincount/cteward-st-lexware"
   },
   "scripts": {
-    "test": "mocha"
+    "test": "make test-cov"
   },
   "dependencies": {
     "base64": "^2.1.0",

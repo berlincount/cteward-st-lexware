@@ -1,6 +1,5 @@
 REPORTER = spec
 test: lint
-	@echo TRAVIS_JOB_ID $(TRAVIS_JOB_ID)
 	@NODE_ENV=test ./node_modules/.bin/mocha -b --reporter $(REPORTER)
 
 lint:
@@ -12,7 +11,7 @@ test-cov: test
 		--reporter html-cov > coverage.html
 
 test-cov-travis: test
-	$(MAKE) lint
+	@echo TRAVIS_JOB_ID $(TRAVIS_JOB_ID)
 	@NODE_ENV=test ./node_modules/.bin/mocha \
 		--require blanket \
 		--reporter travis-cov
