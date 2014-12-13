@@ -30,7 +30,7 @@
     "sinon": "~1.12.1",
     "mocha": "^2.0.1",
     "mocha-lcov-reporter": "0.0.1",
-    "coveralls": "^2.11.2",
+    "memorystream": "^0.2.0",
     "travis-cov": "^0.2.5"
   },
   "config": {

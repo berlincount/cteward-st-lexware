@@ -10,5 +10,7 @@
     },
     "server": {
         "bind": 14334
-    }
+    },
+    "logfile": "testlogfile",
+    "loglevel": "debug"
 }
