@@ -39,16 +39,16 @@ describe('lib: memberdata', function() {
             // data in raw format as stored in backend database
             member = {
                 "Kennung3": "crew",
-                "Austritt": "2013-12-31"
+                "Austritt": "2013-12-31" // will be interpreted according to local timezone (set to UTC for testing)
             };
 
-            clock = sinon.useFakeTimers(new Date("Thu May 23 2013 23:56:42.423 GMT+0100").getTime());
+            clock = sinon.useFakeTimers(new Date("Thu May 23 2013 23:56:42.423 GMT+0000").getTime());
             assert.equal(memberdata.realstatus(member), 'crew',    'input: "crew", some time in 2013');
-            clock = sinon.useFakeTimers(new Date("Tue Dec 31 2013 23:59:59.000 GMT+0100").getTime());
+            clock = sinon.useFakeTimers(new Date("Tue Dec 31 2013 23:59:59.000 GMT+0000").getTime());
             assert.equal(memberdata.realstatus(member), 'crew',    'input: "crew", a second before midnight');
-            clock = sinon.useFakeTimers(new Date("Wed Jan  1 2014 00:00:00.000 GMT+0100").getTime());
+            clock = sinon.useFakeTimers(new Date("Wed Jan  1 2014 00:00:00.000 GMT+0000").getTime());
             assert.equal(memberdata.realstatus(member), 'ex-crew', 'input: "crew", at midnight');
-            clock = sinon.useFakeTimers(new Date("Fri May 23 2014 23:56:42.423 GMT+0100").getTime());
+            clock = sinon.useFakeTimers(new Date("Fri May 23 2014 23:56:42.423 GMT+0000").getTime());
             assert.equal(memberdata.realstatus(member), 'ex-crew', 'input: "crew", some time in 2014');
             clock.restore();
 
@@ -58,16 +58,16 @@ describe('lib: memberdata', function() {
             // data in raw format as stored in backend database
             member = {
                 "Kennung3": "passive",
-                "Austritt": "2013-12-31"
+                "Austritt": "2013-12-31" // will be interpreted according to local timezone (set to UTC for testing)
             };
 
-            clock = sinon.useFakeTimers(new Date("Thu May 23 2013 23:56:42.423 GMT+0100").getTime());
+            clock = sinon.useFakeTimers(new Date("Thu May 23 2013 23:56:42.423 GMT+0000").getTime());
             assert.equal(memberdata.realstatus(member), 'passiv',  'input: "passiv", some time in 2013');
-            clock = sinon.useFakeTimers(new Date("Tue Dec 31 2013 23:59:59.000 GMT+0100").getTime());
+            clock = sinon.useFakeTimers(new Date("Tue Dec 31 2013 23:59:59.000 GMT+0000").getTime());
             assert.equal(memberdata.realstatus(member), 'passiv',  'input: "passiv", a second before midnight');
-            clock = sinon.useFakeTimers(new Date("Wed Jan  1 2014 00:00:00.000 GMT+0100").getTime());
+            clock = sinon.useFakeTimers(new Date("Wed Jan  1 2014 00:00:00.000 GMT+0000").getTime());
             assert.equal(memberdata.realstatus(member), 'ex-crew', 'input: "passiv", at midnight');
-            clock = sinon.useFakeTimers(new Date("Fri May 23 2014 23:56:42.423 GMT+0100").getTime());
+            clock = sinon.useFakeTimers(new Date("Fri May 23 2014 23:56:42.423 GMT+0000").getTime());
             assert.equal(memberdata.realstatus(member), 'ex-crew', 'input: "passiv", some time in 2014');
             clock.restore();
 
@@ -77,16 +77,16 @@ describe('lib: memberdata', function() {
             // data in raw format as stored in backend database
             member = {
                 "Kennung3": "raumfahrer",
-                "Austritt": "2013-12-31"
+                "Austritt": "2013-12-31" // will be interpreted according to local timezone (set to UTC for testing)
             };
 
-            clock = sinon.useFakeTimers(new Date("Thu May 23 2013 23:56:42.423 GMT+0100").getTime());
+            clock = sinon.useFakeTimers(new Date("Thu May 23 2013 23:56:42.423 GMT+0000").getTime());
             assert.equal(memberdata.realstatus(member), 'raumfahrer',    'input: "raumfahrer", some time in 2013');
-            clock = sinon.useFakeTimers(new Date("Tue Dec 31 2013 23:59:59.000 GMT+0100").getTime());
+            clock = sinon.useFakeTimers(new Date("Tue Dec 31 2013 23:59:59.000 GMT+0000").getTime());
             assert.equal(memberdata.realstatus(member), 'raumfahrer',    'input: "raumfahrer", a second before midnight');
-            clock = sinon.useFakeTimers(new Date("Wed Jan  1 2014 00:00:00.000 GMT+0100").getTime());
+            clock = sinon.useFakeTimers(new Date("Wed Jan  1 2014 00:00:00.000 GMT+0000").getTime());
             assert.equal(memberdata.realstatus(member), 'ex-raumfahrer', 'input: "raumfahrer", at midnight');
-            clock = sinon.useFakeTimers(new Date("Fri May 23 2014 23:56:42.423 GMT+0100").getTime());
+            clock = sinon.useFakeTimers(new Date("Fri May 23 2014 23:56:42.423 GMT+0000").getTime());
             assert.equal(memberdata.realstatus(member), 'ex-raumfahrer', 'input: "raumfahrer", some time in 2014');
             clock.restore();
 
