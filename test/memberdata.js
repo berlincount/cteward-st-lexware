@@ -94,3 +94,42 @@ describe('lib: memberdata', function() {
         });
     });
 });
+
+/*
+function datum(isodate) {
+  if (typeof isodate != 'string' || isodate.length != 8)
+    return '1.1.1970';
+
+  date = strptime(isodate, '%Y%m%d');
+  return date.getDate()+'.'+(date.getMonth()+1)+'.'+date.getFullYear();
+}
+
+function datum_parsed(isodate) {
+  date = new Date(isodate);
+  if (!date)
+    return '1.1.1970';
+  return date.getDate()+'.'+(date.getMonth()+1)+'.'+date.getFullYear();
+}
+
+function patenarray(patenstr) {
+  if (!patenstr)
+    return [];
+
+  if (!patenstr.indexOf(','))
+    return [ patenstr.trim() ];
+
+  return patenstr.split(',').map(trim);
+}
+
+function cleanpaten(patenstr) {
+  return patenarray(patenstr).join(',');
+}
+
+module.exports = {
+  realstatus: realstatus,
+  datum: datum,
+  datum_parsed: datum_parsed,
+  cleanpaten: cleanpaten,
+  patenarray: patenarray,
+};
+*/
