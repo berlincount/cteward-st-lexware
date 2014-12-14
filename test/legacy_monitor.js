@@ -39,7 +39,7 @@ describe('service: /legacy/monitor', function() {
             // test server
             client.get('/legacy/monitor', function(err, req, res, data) {
                 // check basic content
-                assert(err, 'failure did not cause error');
+                assert(err, "failure didn't cause error");
                 assert.equal(res.statusCode, 503, 'unexpected HTTP statusCode: '+res.statusCode);
                 assert.equal(data.status, 'BROKEN', 'unexpected data: '+data);
 
@@ -58,7 +58,7 @@ describe('service: /legacy/monitor', function() {
             // test server
             client.get('/legacy/monitor', function(err, req, res, data) {
                 // check basic content
-                assert(err, 'failure did not cause error');
+                assert(err, "failure didn't cause error");
                 assert.equal(res.statusCode, 500, 'unexpected HTTP statusCode: '+res.statusCode);
                 assert.equal(data.message, 'SomeModerateError', 'unexpected data: '+data);
 
