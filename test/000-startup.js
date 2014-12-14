@@ -3,6 +3,10 @@ var os = require('os');
 
 // logfile simulation
 fs = require('fs');
+
+// database simulation
+database = require('../lib/database');
+
 MemoryStream = require('memorystream');
 memstream = new MemoryStream();
 memstream_data = [];
@@ -38,12 +42,18 @@ before(function(done) {
   Promise = global.Promise || require('bluebird');
   process.env.CTEWARD_ST_LEXWARE_CONFIG = 'st-lexware-test.json';
 
+  // database simulation
+  database_checkBackendOkay = sinon.stub(database, 'checkBackendOkay');
+
   memstream_data = [];
   require('../lib/startup')();
   done();
 });
 
 after(function(done) {
+  // database simulation
+  database_checkBackendOkay.restore();
+
   if (memstream_data.length !== 0) {
     console.log('unchecked logfile data:');
     console.log(memstream_data);
