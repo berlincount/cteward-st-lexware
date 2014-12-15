@@ -28,6 +28,15 @@ describe('lib: memberdata', function() {
 
             done();
         });
+        it("should return member as 'ex-crew' if the crewname has a 'disabled-' prefix", function(done) {
+            member = {
+                "Kennung3": "crew",
+                "Kurzname": "disabled-testuser"
+            };
+            assert.equal(memberdata.realstatus(member),'ex-crew');
+
+            done();
+        });
         it("should pass through other directly set member status", function(done) {
             assert.equal(memberdata.realstatus({ "Kennung3": "ex-crew"}), 'ex-crew', 'input: "ex-crew"');
             assert.equal(memberdata.realstatus({ "Kennung3": "blocked"}), 'blocked', 'input: "blocked"');
@@ -93,43 +102,68 @@ describe('lib: memberdata', function() {
             done();
         });
     });
+    describe('datum', function() {
+        it("should return '1.1.1970' when called with invalid data", function(done) {
+            assert.equal(memberdata.datum(),               '1.1.1970', "input: nothing");
+            assert.equal(memberdata.datum(null),           '1.1.1970', "input: null");
+            assert.equal(memberdata.datum("foo"),          '1.1.1970', "input: 'foo'");
+            assert.equal(memberdata.datum("201412150000"), '1.1.1970', "input: '201412150000'");
+
+            done();
+        });
+        it("should return converted dates correctly", function(done) {
+            assert.equal(memberdata.datum("19430107"), '7.1.1943',   "input: '19430107'");
+            assert.equal(memberdata.datum("19700101"), '1.1.1970',   "input: '19700101'");
+            assert.equal(memberdata.datum("20141215"), '15.12.2014', "input: '20141215'");
+            assert.equal(memberdata.datum("23880229"), '29.2.2388',  "input: '23880229'");
+
+            done();
+        });
+    });
+    describe('datum_parsed', function() {
+        it("should return '1.1.1970' when called with invalid data", function(done) {
+            assert.equal(memberdata.datum_parsed(),               '1.1.1970', "input: nothing");
+            assert.equal(memberdata.datum_parsed(null),           '1.1.1970', "input: null");
+            assert.equal(memberdata.datum_parsed("foo"),          '1.1.1970', "input: 'foo'");
+            assert.equal(memberdata.datum_parsed("201412150000"), '1.1.1970', "input: '201412150000'");
+
+            done();
+        });
+        it("should return converted dates correctly", function(done) {
+            assert.equal(memberdata.datum_parsed("1943-01-07"), '7.1.1943',   "input: '1943-01-07'");
+            assert.equal(memberdata.datum_parsed("1970-01-01"), '1.1.1970',   "input: '1970-01-01'");
+            assert.equal(memberdata.datum_parsed("2014-12-15"), '15.12.2014', "input: '2014-12-15'");
+            assert.equal(memberdata.datum_parsed("2388-02-29"), '29.2.2388',  "input: '2388-02-29'");
+            assert.equal(memberdata.datum_parsed("Thu, 13 Feb 1969 23:32:54 -0330"), '14.2.1969' /* test TZ=UTC! */,  "input: 'Thu, 13 Feb 1969 23:32:54 -0330'");
+            assert.equal(memberdata.datum_parsed("Fri, 21 Nov 1997 09:55:06 -0600"), '21.11.1997', "input: 'Fri, 21 Nov 1997 09:55:06 -0600'");
+            assert.equal(memberdata.datum_parsed("Tue, 1 Jul 2003 10:52:37 +0200"),  '1.7.2003',   "input: 'Tue, 1 Jul 2003 10:52:37 +0200'");
+            assert.equal(memberdata.datum_parsed("Mon, 15 Dec 2014 01:45:25 +0100"), '15.12.2014', "input: 'Mon, 15 Dec 2014 01:45:25 +0100'");
+
+            done();
+        });
+    });
+    describe('patenarray', function() {
+        it("should decode a comma-separated list of members with horrible whitespaces and return an array", function(done) {
+            assert.deepEqual(memberdata.patenarray(),          []); //, "input: nothing");
+            assert.deepEqual(memberdata.patenarray(null),      [], "input: null");
+            assert.deepEqual(memberdata.patenarray("foo"),     [ "foo" ], "input: 'foo'");
+            assert.deepEqual(memberdata.patenarray("foo,bar"), [ "foo","bar"], "input: 'foo,bar'");
+            assert.deepEqual(memberdata.patenarray(" foo,bar , baz , bam,   muuuh"),
+                [ "foo","bar","baz","bam","muuuh" ],
+                "input: ' foo,bar , baz , bam,   muuuh'");
+
+            done();
+        });
+        it("should decode a comma-separated list of members with horrible whitespaces and return an clean string", function(done) {
+            assert.equal(memberdata.cleanpaten(),          "", "input: nothing");
+            assert.equal(memberdata.cleanpaten(null),      "", "input: null");
+            assert.equal(memberdata.cleanpaten("foo"),     "foo", "input: 'foo'");
+            assert.equal(memberdata.cleanpaten("foo,bar"), "foo,bar", "input: 'foo,bar'");
+            assert.equal(memberdata.cleanpaten(" foo,bar , baz , bam,   muuuh"),
+                "foo,bar,baz,bam,muuuh",
+                "input: ' foo,bar , baz , bam,   muuuh'");
+
+            done();
+        });
+    });
 });
-
-/*
-function datum(isodate) {
-  if (typeof isodate != 'string' || isodate.length != 8)
-    return '1.1.1970';
-
-  date = strptime(isodate, '%Y%m%d');
-  return date.getDate()+'.'+(date.getMonth()+1)+'.'+date.getFullYear();
-}
-
-function datum_parsed(isodate) {
-  date = new Date(isodate);
-  if (!date)
-    return '1.1.1970';
-  return date.getDate()+'.'+(date.getMonth()+1)+'.'+date.getFullYear();
-}
-
-function patenarray(patenstr) {
-  if (!patenstr)
-    return [];
-
-  if (!patenstr.indexOf(','))
-    return [ patenstr.trim() ];
-
-  return patenstr.split(',').map(trim);
-}
-
-function cleanpaten(patenstr) {
-  return patenarray(patenstr).join(',');
-}
-
-module.exports = {
-  realstatus: realstatus,
-  datum: datum,
-  datum_parsed: datum_parsed,
-  cleanpaten: cleanpaten,
-  patenarray: patenarray,
-};
-*/
