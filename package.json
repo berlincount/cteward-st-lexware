@@ -40,7 +40,7 @@
       "data-cover-never": "node_modules"
     },
     "travis-cov": {
-      "threshold": 33
+      "threshold": 42
     }
   }
 }

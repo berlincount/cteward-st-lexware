@@ -29,7 +29,7 @@ describe('lib: memberdata', function() {
             done();
         });
         it("should return member as 'ex-crew' if the crewname has a 'disabled-' prefix", function(done) {
-            member = {
+            var member = {
                 "Kennung3": "crew",
                 "Kurzname": "disabled-testuser"
             };
@@ -46,12 +46,12 @@ describe('lib: memberdata', function() {
         });
         it("should return member as 'ex-crew' right after the contract ended, and only then", function(done) {
             // data in raw format as stored in backend database
-            member = {
+            var member = {
                 "Kennung3": "crew",
                 "Austritt": "2013-12-31" // will be interpreted according to local timezone (set to UTC for testing)
             };
 
-            clock = sinon.useFakeTimers(new Date("Thu May 23 2013 23:56:42.423 GMT+0000").getTime());
+            var clock = sinon.useFakeTimers(new Date("Thu May 23 2013 23:56:42.423 GMT+0000").getTime());
             assert.equal(memberdata.realstatus(member), 'crew',    'input: "crew", some time in 2013');
             clock = sinon.useFakeTimers(new Date("Tue Dec 31 2013 23:59:59.000 GMT+0000").getTime());
             assert.equal(memberdata.realstatus(member), 'crew',    'input: "crew", a second before midnight');
@@ -65,12 +65,12 @@ describe('lib: memberdata', function() {
         });
         it("should return passive member as 'ex-crew' right after the contract ended, and only then", function(done) {
             // data in raw format as stored in backend database
-            member = {
+            var member = {
                 "Kennung3": "passive",
                 "Austritt": "2013-12-31" // will be interpreted according to local timezone (set to UTC for testing)
             };
 
-            clock = sinon.useFakeTimers(new Date("Thu May 23 2013 23:56:42.423 GMT+0000").getTime());
+            var clock = sinon.useFakeTimers(new Date("Thu May 23 2013 23:56:42.423 GMT+0000").getTime());
             assert.equal(memberdata.realstatus(member), 'passiv',  'input: "passiv", some time in 2013');
             clock = sinon.useFakeTimers(new Date("Tue Dec 31 2013 23:59:59.000 GMT+0000").getTime());
             assert.equal(memberdata.realstatus(member), 'passiv',  'input: "passiv", a second before midnight');
@@ -84,12 +84,12 @@ describe('lib: memberdata', function() {
         });
         it("should return astronaut as 'ex-raumfahrer' right after the contract ended, and only then", function(done) {
             // data in raw format as stored in backend database
-            member = {
+            var member = {
                 "Kennung3": "raumfahrer",
                 "Austritt": "2013-12-31" // will be interpreted according to local timezone (set to UTC for testing)
             };
 
-            clock = sinon.useFakeTimers(new Date("Thu May 23 2013 23:56:42.423 GMT+0000").getTime());
+            var clock = sinon.useFakeTimers(new Date("Thu May 23 2013 23:56:42.423 GMT+0000").getTime());
             assert.equal(memberdata.realstatus(member), 'raumfahrer',    'input: "raumfahrer", some time in 2013');
             clock = sinon.useFakeTimers(new Date("Tue Dec 31 2013 23:59:59.000 GMT+0000").getTime());
             assert.equal(memberdata.realstatus(member), 'raumfahrer',    'input: "raumfahrer", a second before midnight');

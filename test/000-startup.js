@@ -2,17 +2,17 @@ var sinon = require('sinon');
 var os = require('os');
 
 // logfile simulation
-fs = require('fs');
+var fs = require('fs');
 
 // database simulation
-database = require('../lib/database');
+var database = require('../lib/database');
 
-MemoryStream = require('memorystream');
-memstream = new MemoryStream();
+var MemoryStream = require('memorystream');
+var memstream = new MemoryStream();
 memstream_data = [];
 memstream.on('data', function(chunk) {
-  message = chunk.toString();
-  messagedata = JSON.parse(message);
+  var message = chunk.toString();
+  var messagedata = JSON.parse(message);
   // console.log(messagedata);
   // { name: 'cteward-st-lexware',
   //   hostname: 'foobar',
@@ -27,19 +27,18 @@ memstream.on('data', function(chunk) {
       throw new Error('logging: wrong process ID was logged: '+messagedata.pid);
   if (messagedata.hostname !== os.hostname())
       throw new Error('logging: wrong hostname was logged: '+messagedata.hostname);
-  then = new Date(messagedata.time);
-  now  = new Date();
+  var then = new Date(messagedata.time);
+  var now  = new Date();
   if (now - then > 30000 || now - then < 0)
       throw new Error('logging: time of logging seems too far away from now: '+then+' vs '+now);
 
   if (messagedata.msg !== 'cteward-st-lexware listening at http://0.0.0.0:14334')
       memstream_data.push(messagedata.msg);
 });
-filestub = sinon.stub(fs, 'createWriteStream');
+var filestub = sinon.stub(fs, 'createWriteStream');
 filestub.withArgs('testlogfile').returns(memstream);
 
 before(function(done) {
-  Promise = global.Promise || require('bluebird');
   process.env.CTEWARD_ST_LEXWARE_CONFIG = 'st-lexware-test.json';
 
   // database simulation

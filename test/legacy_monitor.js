@@ -23,7 +23,7 @@ describe('service: /legacy/monitor', function() {
                     assert.equal(data.status, 'OK', 'unexpected data: '+data);
 
                     // check server logging
-                    logmsg = memstream_data.shift();
+                    var logmsg = memstream_data.shift();
                     assert.equal(logmsg, 'anonymous GET /legacy/monitor', 'unexpected log message: '+logmsg);
 
                     done();
@@ -44,7 +44,7 @@ describe('service: /legacy/monitor', function() {
                 assert.equal(data.status, 'BROKEN', 'unexpected data: '+data);
 
                 // check server logging
-                logmsg = memstream_data.shift();
+                var logmsg = memstream_data.shift();
                 assert.equal(logmsg, 'anonymous GET /legacy/monitor', 'unexpected log message: '+logmsg);
 
                 done();
@@ -63,7 +63,7 @@ describe('service: /legacy/monitor', function() {
                 assert.equal(data.message, 'SomeModerateError', 'unexpected data: '+data);
 
                 // check server logging
-                logmsg = memstream_data.shift();
+                var logmsg = memstream_data.shift();
                 assert.equal(logmsg, 'anonymous GET /legacy/monitor', 'unexpected log message: '+logmsg); 
 
                 done();
