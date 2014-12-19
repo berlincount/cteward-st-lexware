@@ -30,6 +30,7 @@
     "sinon": "~1.12.1",
     "mocha": "^2.0.1",
     "mocha-lcov-reporter": "0.0.1",
+    "require-subvert": "^0.1.0",
     "memorystream": "^0.2.0",
     "travis-cov": "^0.2.5"
   },
@@ -39,7 +40,7 @@
       "data-cover-never": "node_modules"
     },
     "travis-cov": {
-      "threshold": 20
+      "threshold": 33
     }
   }
 }

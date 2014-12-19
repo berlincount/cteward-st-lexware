@@ -8,7 +8,10 @@ lint:
 test-cov: test
 	@TZ=UTC NODE_ENV=test ./node_modules/.bin/mocha \
 		--require blanket \
-		--reporter html-cov > coverage.html
+		--reporter html-cov > coverage.html.new \
+	&& cat coverage.html.new > coverage.html \
+	&& rm coverage.html.new
+	@# avoiding an empty (hardlinked) coverage file between runs
 
 test-cov-coveralls: test
 	@echo TRAVIS_JOB_ID $(TRAVIS_JOB_ID)
