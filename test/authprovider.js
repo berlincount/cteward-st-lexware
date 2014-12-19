@@ -8,12 +8,7 @@ Promise.onPossiblyUnhandledRejection(function(error){
 var assert = require('assert');
 var sinon = require('sinon');
 var requireSubvert = require('require-subvert')(__dirname);
-//var LdapAuth = require('ldapauth-fork');
-/*
-var restify    = require('restify');
-var database   = require('./database');
-var memberdata = require('./memberdata');
-*/
+var database   = require('../lib/database');
 
 // our test subject
 authprovider = require('../lib/authprovider');
@@ -57,7 +52,7 @@ describe('lib: authprovider', function() {
             });
         });
         it("should should call the chain of authentication functions in order, filling in data as expected", function() {
-            originaldata = {
+            var passeddata = {
                 "config": {
                     "auth": {
                         "bots": {}
@@ -71,51 +66,51 @@ describe('lib: authprovider', function() {
                 }
             };
 
-            authprovider_find_botuser          = sinon.stub(authprovider, 'find_botuser',
+            var authprovider_find_botuser          = sinon.stub(authprovider, 'find_botuser',
                 new Promise.method(function test(data) {
-                    assert.equal(data, originaldata);
+                    assert.equal(data, passeddata);
                     assert.equal(data.callorder_test, undefined);
                     data.callorder_test = 0;
                     return data;
                 }));
-            authprovider_find_ldapuser         = sinon.stub(authprovider, 'find_ldapuser',
+            var authprovider_find_ldapuser         = sinon.stub(authprovider, 'find_ldapuser',
                 new Promise.method(function test(data) {
-                    assert.equal(data, originaldata);
+                    assert.equal(data, passeddata);
                     assert.equal(data.callorder_test, 0);
                     data.callorder_test++;
                     return data;
                 }));
-            authprovider_find_config_flags     = sinon.stub(authprovider, 'find_config_flags',
+            var authprovider_find_config_flags     = sinon.stub(authprovider, 'find_config_flags',
                 new Promise.method(function test(data) {
-                    assert.equal(data, originaldata);
+                    assert.equal(data, passeddata);
                     assert.equal(data.callorder_test, 1);
                     data.callorder_test++;
                     return data;
                 }));
-            authprovider_find_database_flags   = sinon.stub(authprovider, 'find_database_flags',
+            var authprovider_find_database_flags   = sinon.stub(authprovider, 'find_database_flags',
                 new Promise.method(function test(data) {
-                    assert.equal(data, originaldata);
+                    assert.equal(data, passeddata);
                     assert.equal(data.callorder_test, 2);
                     data.callorder_test++;
                     return data;
                 }));
-            authprovider_impersonate           = sinon.stub(authprovider, 'impersonate',
+            var authprovider_impersonate           = sinon.stub(authprovider, 'impersonate',
                 new Promise.method(function test(data) {
-                    assert.equal(data, originaldata);
+                    assert.equal(data, passeddata);
                     assert.equal(data.callorder_test, 3);
                     data.callorder_test++;
                     return data;
                 }));
-            authprovider_effective_permissions = sinon.stub(authprovider, 'effective_permissions',
+            var authprovider_effective_permissions = sinon.stub(authprovider, 'effective_permissions',
                 new Promise.method(function test(data) {
-                    assert.equal(data, originaldata);
+                    assert.equal(data, passeddata);
                     assert.equal(data.callorder_test, 4);
                     data.callorder_test++;
                     return data;
                 }));
-            return authprovider.authorize(originaldata)
+            return authprovider.authorize(passeddata)
             .then(function(data) {
-                assert.equal(data, originaldata);
+                assert.equal(data, passeddata);
                 assert.deepEqual(data, {
                     "config": {
                         "auth": {
@@ -313,7 +308,7 @@ describe('lib: authprovider', function() {
         });
         it("should return an InternalError when communication with LDAP server fails", function() {
             // simulate LDAP server access
-            ldap_closed = false;
+            var ldap_closed = false;
             var ldapConnApi = {
                 authenticate: function(username,password) {
                     assert.equal(username, "testuser");
@@ -324,8 +319,8 @@ describe('lib: authprovider', function() {
                     ldap_closed = true;
                 }
             };
-            ldapauth_stub = sinon.stub();
-            ldapconn_mock = sinon.mock(ldapConnApi);
+            var ldapauth_stub = sinon.stub();
+            var ldapconn_mock = sinon.mock(ldapConnApi);
             ldapauth_stub.withArgs("SomeLdapConfig").returns(ldapconn_mock.object);
             requireSubvert.subvert('ldapauth-fork', ldapauth_stub);
             authprovider = requireSubvert.require('../lib/authprovider');
@@ -357,7 +352,7 @@ describe('lib: authprovider', function() {
         });
         it("should return the input data unmodified when LDAP-authentication fails", function() {
             // simulate LDAP server access
-            ldap_closed = false;
+            var ldap_closed = false;
             var ldapConnApi = {
                 authenticate: function(username,password) {
                     assert.equal(username, "testuser");
@@ -374,8 +369,8 @@ describe('lib: authprovider', function() {
                     ldap_closed = true;
                 }
             };
-            ldapauth_stub = sinon.stub();
-            ldapconn_mock = sinon.mock(ldapConnApi);
+            var ldapauth_stub = sinon.stub();
+            var ldapconn_mock = sinon.mock(ldapConnApi);
             ldapauth_stub.withArgs("SomeLdapConfig").returns(ldapconn_mock.object);
             requireSubvert.subvert('ldapauth-fork', ldapauth_stub);
             authprovider = requireSubvert.require('../lib/authprovider');
@@ -417,7 +412,7 @@ describe('lib: authprovider', function() {
         });
         it("should return the input data with the username set when LDAP-authentication succeeds", function() {
             // simulate LDAP server access
-            ldap_closed = false;
+            var ldap_closed = false;
             var ldapConnApi = {
                 authenticate: function(username,password,callback) {
                     assert.equal(username, "testuser");
@@ -428,8 +423,8 @@ describe('lib: authprovider', function() {
                     ldap_closed = true;
                 }
             };
-            ldapauth_stub = sinon.stub();
-            ldapconn_mock = sinon.mock(ldapConnApi);
+            var ldapauth_stub = sinon.stub();
+            var ldapconn_mock = sinon.mock(ldapConnApi);
             ldapauth_stub.withArgs("SomeLdapConfig").returns(ldapconn_mock.object);
             requireSubvert.subvert('ldapauth-fork', ldapauth_stub);
             authprovider = requireSubvert.require('../lib/authprovider');
@@ -489,18 +484,9 @@ describe('lib: authprovider', function() {
             });
         });
         it("should return the input data with basic flags set when nothing else matches", function() {
-            log_tested = false;
-            log_debug = function(logtag,logdata) {
-                try {
-                    assert.equal(logtag, 'CFLAGS');
-                    assert.deepEqual(logdata, [
-                        '_anonymous_'
-                    ]);
-                    log_tested = true;
-                } catch(e) {
-                    log_tested = e;
-                }
-            };
+            var log_debug = sinon.stub();
+            log_debug.withArgs('CFLAGS', [ '_anonymous_' ]).returns(true);
+            log_debug.throws("Unexpected logdata");
             return authprovider.find_config_flags({
                     "config": {
                         "auth": {
@@ -535,23 +521,13 @@ describe('lib: authprovider', function() {
                 });
             })
             .finally(function() {
-                assert.strictEqual(log_tested, true);
+                assert.equal(log_debug.callCount, 1);
             });
         });
         it("should return the input data with basic flags + _self_ set when user asks about himself", function() {
-            log_tested = false;
-            log_debug = function(logtag,logdata) {
-                try {
-                    assert.equal(logtag, 'CFLAGS');
-                    assert.deepEqual(logdata, [
-                        '_anonymous_',
-                        '_self_'
-                    ]);
-                    log_tested = true;
-                } catch(e) {
-                    log_tested = e;
-                }
-            };
+            var log_debug = sinon.stub();
+            log_debug.withArgs('CFLAGS', [ '_anonymous_', '_self_' ]).returns(true);
+            log_debug.throws("Unexpected logdata");
             return authprovider.find_config_flags({
                     "config": {
                         "auth": {
@@ -591,23 +567,13 @@ describe('lib: authprovider', function() {
                 });
             })
             .finally(function() {
-                assert.strictEqual(log_tested, true);
+                assert.equal(log_debug.callCount, 1);
             });
         });
         it("should return the input data with basic + additional flags when configured", function() {
-            log_tested = false;
-            log_debug = function(logtag,logdata) {
-                try {
-                    assert.equal(logtag, 'CFLAGS');
-                    assert.deepEqual(logdata, [
-                        '_anonymous_',
-                        '_something_'
-                    ]);
-                    log_tested = true;
-                } catch(e) {
-                    log_tested = e;
-                }
-            };
+            var log_debug = sinon.stub();
+            log_debug.withArgs('CFLAGS', [ '_anonymous_', '_something_' ]).returns(true);
+            log_debug.throws("Unexpected logdata");
             return authprovider.find_config_flags({
                     "config": {
                         "auth": {
@@ -651,24 +617,13 @@ describe('lib: authprovider', function() {
                 });
             })
             .finally(function() {
-                assert.strictEqual(log_tested, true);
+                assert.equal(log_debug.callCount, 1);
             });
         });
         it("should return the input data with basic + additional flags when configured as well as _self_ set when user asks about himself", function() {
-            log_tested = false;
-            log_debug = function(logtag,logdata) {
-                try {
-                    assert.equal(logtag, 'CFLAGS');
-                    assert.deepEqual(logdata, [
-                        '_anonymous_',
-                        '_self_',
-                        '_something_'
-                    ]);
-                    log_tested = true;
-                } catch(e) {
-                    log_tested = e;
-                }
-            };
+            var log_debug = sinon.stub();
+            log_debug.withArgs('CFLAGS', [ '_anonymous_', '_self_', '_something_' ]).returns(true);
+            log_debug.throws("Unexpected logdata");
             return authprovider.find_config_flags({
                     "config": {
                         "auth": {
@@ -717,68 +672,454 @@ describe('lib: authprovider', function() {
                 });
             })
             .finally(function() {
-                assert.strictEqual(log_tested, true);
+                assert.equal(log_debug.callCount, 1);
+            });
+        });
+    });
+    describe('find_database_flags', function() {
+        it("should return a TypeError when called without data", function() {
+            return authprovider.find_database_flags()
+            .then(assert.fail)
+            .catch(TypeError, function() {});
+        });
+        it("should return a UnauthorizedError when no username was given", function() {
+            return authprovider.find_database_flags({
+                "config": {}
+            })
+            .then(assert.fail)
+            .catch(function(e) {
+                assert.equal(e.name, 'UnauthorizedError');
+                assert.equal(e.statusCode, 401);
+                assert.equal(e.message, 'Not authorized. #6');
+            });
+        });
+        it("should return the input data as-is when member lookup fails", function() {
+            var database_memberlookup = sinon.stub(database, 'memberlookup',
+                new Promise.method(function test() {
+                    throw new Error("SomethingOrOther");
+                }));
+            return authprovider.find_database_flags({
+                    "config": {
+                        "auth": {
+                            "flags": {}
+                        }
+                    },
+                    "request": {
+                        "params": {}
+                    },
+                    "username": "testuser"
+            })
+            .then(function(data) {
+                assert.deepEqual(data,{
+                    "config": {
+                        "auth": {
+                            "flags": {}
+                        }
+                    },
+                    "request": {
+                        "params": {}
+                    },
+                    "username": "testuser"
+                });
+            })
+            .finally(function() {
+                database_memberlookup.restore();
+            });
+        });
+        it("should return the input data without flags being changed for unexpected status", function() {
+            var database_memberlookup = sinon.stub(database, 'memberlookup',
+                new Promise.method(function test(username) {
+                    assert.equal(username, "testuser");
+                    return { "Kennung3": "rohstatus" };
+                }));
+            var memberdata_realstatus = sinon.stub(memberdata, 'realstatus',
+                function test(data) {
+                    assert.deepEqual(data, { "Kennung3": "rohstatus" });
+                    return "somestatus";
+                });
+            var log_debug = sinon.stub();
+            log_debug.withArgs("MEMBERLOOKUP", { "Kennung3": "rohstatus" }).returns(true);
+            log_debug.withArgs("ROHSTATUS", "rohstatus", "REALSTATUS", "somestatus").returns(true);
+            log_debug.withArgs('DFLAGS', [ '_anonymous_', '_self_' ]).returns(true);
+            log_debug.throws("Unexpected logdata");
+            return authprovider.find_database_flags({
+                    "config": {
+                        "auth": {
+                            "flags": {}
+                        }
+                    },
+                    "request": {
+                        "params": {
+                            "crewname": "testuser"
+                        },
+                        "log": {
+                            "debug": log_debug
+                        }
+                    },
+                    "username": "testuser",
+                    "flags": [
+                        '_anonymous_',
+                        '_self_'
+                    ]
+            })
+            .then(function(data) {
+                assert.deepEqual(data,{
+                    "config": {
+                        "auth": {
+                            "flags": {}
+                        }
+                    },
+                    "request": {
+                        "params": {
+                            "crewname": "testuser"
+                        },
+                        "log": {
+                            "debug": log_debug
+                        }
+                    },
+                    "username": "testuser",
+                    "flags": [
+                        '_anonymous_',
+                        '_self_'
+                    ]
+                });
+            })
+            .finally(function() {
+                database_memberlookup.restore();
+                memberdata_realstatus.restore();
+                assert.equal(log_debug.callCount, 3);
+            });
+        });
+        it("should return the input data with the proper flag being added for a user with realstatus 'crew'", function() {
+            var database_memberlookup = sinon.stub(database, 'memberlookup',
+                new Promise.method(function test(username) {
+                    assert.equal(username, "testuser");
+                    return { "Kennung3": "rohstatus" };
+                }));
+            var memberdata_realstatus = sinon.stub(memberdata, 'realstatus',
+                function test(data) {
+                    assert.deepEqual(data, { "Kennung3": "rohstatus" });
+                    return "crew";
+                });
+            var log_debug = sinon.stub();
+            log_debug.withArgs("MEMBERLOOKUP", { "Kennung3": "rohstatus" }).returns(true);
+            log_debug.withArgs("ROHSTATUS", "rohstatus", "REALSTATUS", "crew").returns(true);
+            log_debug.withArgs('DFLAGS', [ '_anonymous_', '_self_', '_member_' ]).returns(true);
+            log_debug.throws("Unexpected logdata");
+            return authprovider.find_database_flags({
+                    "config": {
+                        "auth": {
+                            "flags": {}
+                        }
+                    },
+                    "request": {
+                        "params": {
+                            "crewname": "testuser"
+                        },
+                        "log": {
+                            "debug": log_debug
+                        }
+                    },
+                    "username": "testuser",
+                    "flags": [
+                        '_anonymous_',
+                        '_self_'
+                    ]
+            })
+            .then(function(data) {
+                assert.deepEqual(data,{
+                    "config": {
+                        "auth": {
+                            "flags": {}
+                        }
+                    },
+                    "request": {
+                        "params": {
+                            "crewname": "testuser"
+                        },
+                        "log": {
+                            "debug": log_debug
+                        }
+                    },
+                    "username": "testuser",
+                    "flags": [
+                        '_anonymous_',
+                        '_self_',
+                        '_member_'
+                    ]
+                });
+            })
+            .finally(function() {
+                database_memberlookup.restore();
+                memberdata_realstatus.restore();
+                assert.equal(log_debug.callCount, 3);
+            });
+        });
+        it("should return the input data with the proper flag being added for a user with realstatus 'raumfahrer'", function() {
+            var database_memberlookup = sinon.stub(database, 'memberlookup',
+                new Promise.method(function test(username) {
+                    assert.equal(username, "testuser");
+                    return { "Kennung3": "rohstatus" };
+                }));
+            var memberdata_realstatus = sinon.stub(memberdata, 'realstatus',
+                function test(data) {
+                    assert.deepEqual(data, { "Kennung3": "rohstatus" });
+                    return "raumfahrer";
+                });
+            var log_debug = sinon.stub();
+            log_debug.withArgs("MEMBERLOOKUP", { "Kennung3": "rohstatus" }).returns(true);
+            log_debug.withArgs("ROHSTATUS", "rohstatus", "REALSTATUS", "raumfahrer").returns(true);
+            log_debug.withArgs('DFLAGS', [ '_anonymous_', '_self_', '_astronaut_' ]).returns(true);
+            log_debug.throws("Unexpected logdata");
+            return authprovider.find_database_flags({
+                    "config": {
+                        "auth": {
+                            "flags": {}
+                        }
+                    },
+                    "request": {
+                        "params": {
+                            "crewname": "testuser"
+                        },
+                        "log": {
+                            "debug": log_debug
+                        }
+                    },
+                    "username": "testuser",
+                    "flags": [
+                        '_anonymous_',
+                        '_self_'
+                    ]
+            })
+            .then(function(data) {
+                assert.deepEqual(data,{
+                    "config": {
+                        "auth": {
+                            "flags": {}
+                        }
+                    },
+                    "request": {
+                        "params": {
+                            "crewname": "testuser"
+                        },
+                        "log": {
+                            "debug": log_debug
+                        }
+                    },
+                    "username": "testuser",
+                    "flags": [
+                        '_anonymous_',
+                        '_self_',
+                        '_astronaut_'
+                    ]
+                });
+            })
+            .finally(function() {
+                database_memberlookup.restore();
+                memberdata_realstatus.restore();
+                assert.equal(log_debug.callCount, 3);
+            });
+        });
+        it("should return the input data with the proper flag being added for a user with realstatus 'passiv'", function() {
+            var database_memberlookup = sinon.stub(database, 'memberlookup',
+                new Promise.method(function test(username) {
+                    assert.equal(username, "testuser");
+                    return { "Kennung3": "rohstatus" };
+                }));
+            var memberdata_realstatus = sinon.stub(memberdata, 'realstatus',
+                function test(data) {
+                    assert.deepEqual(data, { "Kennung3": "rohstatus" });
+                    return "passiv";
+                });
+            var log_debug = sinon.stub();
+            log_debug.withArgs("MEMBERLOOKUP", { "Kennung3": "rohstatus" }).returns(true);
+            log_debug.withArgs("ROHSTATUS", "rohstatus", "REALSTATUS", "passiv").returns(true);
+            log_debug.withArgs('DFLAGS', [ '_anonymous_', '_self_', '_passive_' ]).returns(true);
+            log_debug.throws("Unexpected logdata");
+            return authprovider.find_database_flags({
+                    "config": {
+                        "auth": {
+                            "flags": {}
+                        }
+                    },
+                    "request": {
+                        "params": {
+                            "crewname": "testuser"
+                        },
+                        "log": {
+                            "debug": log_debug
+                        }
+                    },
+                    "username": "testuser",
+                    "flags": [
+                        '_anonymous_',
+                        '_self_'
+                    ]
+            })
+            .then(function(data) {
+                assert.deepEqual(data,{
+                    "config": {
+                        "auth": {
+                            "flags": {}
+                        }
+                    },
+                    "request": {
+                        "params": {
+                            "crewname": "testuser"
+                        },
+                        "log": {
+                            "debug": log_debug
+                        }
+                    },
+                    "username": "testuser",
+                    "flags": [
+                        '_anonymous_',
+                        '_self_',
+                        '_passive_'
+                    ]
+                });
+            })
+            .finally(function() {
+                database_memberlookup.restore();
+                memberdata_realstatus.restore();
+                assert.equal(log_debug.callCount, 3);
+            });
+        });
+    });
+    describe('impersonate', function() {
+        it("should return a TypeError when called without data", function() {
+            return authprovider.impersonate()
+            .then(assert.fail)
+            .catch(TypeError, function() {});
+        });
+        it("should return a UnauthorizedError when no username was given", function() {
+            return authprovider.impersonate({
+                "config": {}
+            })
+            .then(assert.fail)
+            .catch(function(e) {
+                assert.equal(e.name, 'UnauthorizedError');
+                assert.equal(e.statusCode, 401);
+                assert.equal(e.message, 'Not authorized. #7');
+            });
+        });
+        it("should return the input data as-is when no impersonation is requested", function() {
+            return authprovider.impersonate({
+                    "request": {
+                        "query": {}
+                    },
+                    "username": "testuser"
+            })
+            .then(function(data) {
+                assert.deepEqual(data,{
+                    "request": {
+                        "query": {}
+                    },
+                    "username": "testuser"
+                });
+            });
+        });
+        it("should return the input data as-is when the user tries to impersonate himself", function() {
+            return authprovider.impersonate({
+                    "request": {
+                        "query": {
+                            "impersonate": "testuser"
+                        }
+                    },
+                    "username": "testuser"
+            })
+            .then(function(data) {
+                assert.deepEqual(data,{
+                    "request": {
+                        "query": {
+                            "impersonate": "testuser"
+                        }
+                    },
+                    "username": "testuser"
+                });
+            });
+        });
+        it("should return a UnauthorizedError when the user doesn't have a necessary flag", function() {
+            return authprovider.impersonate({
+                    "request": {
+                        "query": {
+                            "impersonate": "otheruser"
+                        }
+                    },
+                    "username": "testuser",
+                    "flags": [
+                        '_anonymous_',
+                        '_self_'
+                    ]
+            })
+            .then(assert.fail)
+            .catch(function(e) {
+                assert.equal(e.name, 'UnauthorizedError');
+                assert.equal(e.statusCode, 401);
+                assert.equal(e.message, 'Not authorized. #8');
+            });
+        });
+        it("should return the input data impersonate otheruser if requestor has _admin_ flag set", function() {
+            var log_debug = sinon.stub();
+            log_debug.withArgs("IMPERSONATE", "otheruser").returns(true);
+            log_debug.throws("Unexpected logdata");
+            var passeddata = {
+                    "request": {
+                        "query": {
+                            "impersonate": "otheruser"
+                        },
+                        "log": {
+                            "debug": log_debug
+                        }
+                    },
+                    "username": "testuser",
+                    "flags": [
+                        '_anonymous_',
+                        '_self_',
+                        '_admin_'
+                    ]
+            };
+            var authprovider_find_config_flags     = sinon.stub(authprovider, 'find_config_flags',
+                new Promise.method(function test(data) {
+                    assert.equal(data, passeddata);
+                    assert.equal(data.callorder_test, undefined);
+                    data.callorder_test = 1;
+                    return data;
+                }));
+            var authprovider_find_database_flags   = sinon.stub(authprovider, 'find_database_flags',
+                new Promise.method(function test(data) {
+                    assert.equal(data, passeddata);
+                    assert.equal(data.callorder_test, 1);
+                    data.callorder_test++;
+                    return data;
+                }));
+            return authprovider.impersonate(passeddata)
+            .then(function(data) {
+                assert.deepEqual(data,{
+                    "request": {
+                        "query": {
+                            "impersonate": "otheruser"
+                        },
+                        "log": {
+                            "debug": log_debug
+                        }
+                    },
+                    "username": "otheruser",
+                    "flags": [
+                    ],
+                    "callorder_test": 2
+                });
+            })
+            .finally(function() {
+                authprovider_find_config_flags.restore();
+                authprovider_find_database_flags.restore();
+                assert.equal(log_debug.callCount, 1);
             });
         });
     });
 });
 /*
 module.exports = {
-    find_config_flags: Promise.method(function find_config_flags(v) {
-        if (v.username === undefined)
-            throw new restify.errors.UnauthorizedError("Not authorized. #5");
-
-        // basic flags
-        v.flags = [ "_anonymous_" ];
-
-        if (v.username == v.request.params.crewname)
-            v.flags.push("_self_");
-
-        if (v.config.auth.flags[v.username] !== undefined)
-            v.flags = v.flags.concat(v.config.auth.flags[v.username]);
-
-        v.request.log.debug('CFLAGS', v.flags);
-        return v;
-    }),
-    find_database_flags: Promise.method(function find_database_flags(v) {
-        if (v.username === undefined)
-            throw new restify.errors.UnauthorizedError("Not authorized. #6");
-
-        return database.memberlookup(v.username).then(function(data){
-            v.request.log.debug('MEMBERLOOKUP', data);
-            realstatus = memberdata.realstatus(data);
-            v.request.log.debug('ROHSTATUS', data.Kennung3, 'REALSTATUS', realstatus);
-            if (realstatus === 'crew')
-                v.flags.push('_member_');
-            else if (realstatus === 'raumfahrer')
-                v.flags.push('_astronaut_');
-            else if (realstatus === 'passiv')
-                v.flags.push('_passive_');
-            v.request.log.debug('DFLAGS', v.flags);
-            return v;
-        }).catch(function(){
-            return v;
-        });
-    }),
-    impersonate: Promise.method(function impersonate(v) {
-        if (v.username === undefined)
-            throw new restify.errors.UnauthorizedError("Not authorized. #7");
-
-        if (v.request.query.impersonate === undefined)
-            return v;
-
-        if (v.request.query.impersonate === v.username)
-            return v;
-
-        if (v.flags.indexOf('_admin_') < 0 &&
-            v.flags.indexOf('_board_') < 0)
-            throw new restify.errors.UnauthorizedError("Not authorized. #8");
-
-        v.request.log.debug('IMPERSONATE', v.request.query.impersonate);
-        v.username = v.request.query.impersonate;
-        return module.exports.find_config_flags(v)
-               .then(module.exports.find_database_flags);
-    }),
     effective_permissions: Promise.method(function effective_permissions(v) {
         if (v.username === undefined)
             throw new restify.errors.UnauthorizedError("Not authorized. #8");
