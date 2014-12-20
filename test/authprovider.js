@@ -1208,9 +1208,9 @@ describe('lib: authprovider', function() {
             })
             .then(assert.fail)
             .catch(function(e) {
-                assert.equal(e.name, 'UnauthorizedError');
-                assert.equal(e.statusCode, 401);
-                assert.equal(e.message, 'Not authorized. #9');
+                assert.equal(e.name, 'ForbiddenError');
+                assert.equal(e.statusCode, 403);
+                assert.equal(e.message, 'The link you followed is either outdated, inaccurate, or the server has been instructed not to let you have it.');
             })
             .finally(function() {
                 assert.equal(log_debug.callCount, 1);
