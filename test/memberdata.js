@@ -7,7 +7,16 @@ memberdata = require('../lib/memberdata');
 describe('lib: memberdata', function() {
     describe('realstatus', function() {
         it("should return a TypeError when called without data", function(done) {
-            assert.throws(function(){ memberdata.realstatus(); }, 'TypeError');
+            var exc;
+            try {
+                memberdata.realstatus();
+            } catch (e) {
+                exc = e;
+                assert.equal(e.name,    'TypeError');
+                assert.equal(e.message, 'Need a member record to work with');
+            }
+
+            assert.notEqual(undefined, exc);
 
             done();
         });

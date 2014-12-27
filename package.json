@@ -12,6 +12,7 @@
     "test": "make test-cov"
   },
   "dependencies": {
+    "apache-md5": "^1.0.0",
     "base64": "^2.1.0",
     "bluebird": "^2.3.11",
     "bunyan": "^1.2.3",
