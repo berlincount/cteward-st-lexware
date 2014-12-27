@@ -186,12 +186,14 @@ describe('lib: authprovider', function() {
                 });
             });
         });
-        it("should return a UnauthorizedError when an unsupported password hashing algorithm is used", function() {
+        it("should return a InternalError when an unsupported password hashing algorithm is used", function() {
+            check_password = sinon.stub(authprovider, 'check_password');
+            check_password.throws(new Error("Some wicked error"));
             return authprovider.find_botuser({
                 "config": {
                     "auth": {
                         "bots": {
-                            "testuser": "$tralala"
+                            "testuser": "$tralala$"
                         }
                     }
                 },
@@ -206,12 +208,18 @@ describe('lib: authprovider', function() {
             })
             .then(assert.fail)
             .catch(function(e) {
-                assert.equal(e.name, 'UnauthorizedError');
-                assert.equal(e.statusCode, 401);
-                assert.equal(e.message, 'Not authorized!');
+                assert.equal(e.name, 'InternalError');
+                assert.equal(e.statusCode, 500);
+                assert.equal(e.message, 'Some wicked error');
+            })
+            .finally(function() {
+                check_password.restore();
             });
         });
-        it("should return a UnauthorizedError when an invalid password is used for a known bot", function() {
+        it("should return a UnauthorizedError when an invalid password (plain) is used for a known bot", function() {
+            check_password = sinon.stub(authprovider, 'check_password');
+            check_password.withArgs('tralala','password').returns(false);
+            check_password.throws(new Error('Unexpected password check'));
             return authprovider.find_botuser({
                 "config": {
                     "auth": {
@@ -235,9 +243,15 @@ describe('lib: authprovider', function() {
                 assert.equal(e.name, 'UnauthorizedError');
                 assert.equal(e.statusCode, 401);
                 assert.equal(e.message, 'Not authorized. #2');
+            })
+            .finally(function() {
+                check_password.restore();
             });
         });
-        it("should return the input data with the username set when configured botuser & password match", function() {
+        it("should return the input data with the username set when configured botuser & password (plain) match", function() {
+            check_password = sinon.stub(authprovider, 'check_password');
+            check_password.withArgs('password','password').returns(true);
+            check_password.throws(new Error('Unexpected password check'));
             return authprovider.find_botuser({
                 "config": {
                     "auth": {
@@ -276,6 +290,88 @@ describe('lib: authprovider', function() {
                     },
                     "username": "testuser"
                 });
+            })
+            .finally(function() {
+                check_password.restore();
+            });
+        });
+        it("should return a UnauthorizedError when an invalid password (hashed & salted) is used for a known bot", function() {
+            check_password = sinon.stub(authprovider, 'check_password');
+            check_password.withArgs('tralala','$something$something').returns(false);
+            check_password.throws(new Error('Unexpected password check'));
+            return authprovider.find_botuser({
+                "config": {
+                    "auth": {
+                        "bots": {
+                            "testuser": "$something$something"
+                        }
+                    }
+                },
+                "request": {
+                    "authorization": {
+                        "scheme": "Basic",
+                        "basic": {
+                            "username": "testuser",
+                            "password": "tralala"
+                        }
+                    }
+                }
+            })
+            .then(assert.fail)
+            .catch(function(e) {
+                assert.equal(e.name, 'UnauthorizedError');
+                assert.equal(e.statusCode, 401);
+                assert.equal(e.message, 'Not authorized. #2');
+            })
+            .finally(function() {
+                check_password.restore();
+            });
+        });
+        it("should return the input data with the username set when configured botuser & password (hashed & salted) match", function() {
+            check_password = sinon.stub(authprovider, 'check_password');
+            check_password.withArgs('password','$something$something').returns(true);
+            check_password.throws(new Error('Unexpected password check'));
+            return authprovider.find_botuser({
+                "config": {
+                    "auth": {
+                        "bots": {
+                            "testuser": "$something$something"
+                        }
+                    }
+                },
+                "request": {
+                    "authorization": {
+                        "scheme": "Basic",
+                        "basic": {
+                            "username": "testuser",
+                            "password": "password"
+                        }
+                    }
+                }
+            })
+            .then(function(data) {
+                assert.deepEqual(data, {
+                    "config": {
+                        "auth": {
+                            "bots": {
+                                "testuser": "$something$something"
+                            }
+                        }
+                    },
+                    "request": {
+                        "authorization": {
+                            "scheme": "Basic",
+                            "basic": {
+                                "username": "testuser",
+                                "password": "password"
+                            }
+                        }
+                    },
+                    "username": "testuser"
+                });
+            })
+            .finally(function() {
+                check_password.restore();
             });
         });
     });
@@ -486,7 +582,7 @@ describe('lib: authprovider', function() {
         it("should return the input data with basic flags set when nothing else matches", function() {
             var log_debug = sinon.stub();
             log_debug.withArgs('CFLAGS', [ '_anonymous_' ]).returns(true);
-            log_debug.throws("Unexpected logdata");
+            log_debug.throws(new Error("Unexpected logdata"));
             return authprovider.find_config_flags({
                     "config": {
                         "auth": {
@@ -527,7 +623,7 @@ describe('lib: authprovider', function() {
         it("should return the input data with basic flags + _self_ set when user asks about himself", function() {
             var log_debug = sinon.stub();
             log_debug.withArgs('CFLAGS', [ '_anonymous_', '_self_' ]).returns(true);
-            log_debug.throws("Unexpected logdata");
+            log_debug.throws(new Error("Unexpected logdata"));
             return authprovider.find_config_flags({
                     "config": {
                         "auth": {
@@ -573,7 +669,7 @@ describe('lib: authprovider', function() {
         it("should return the input data with basic + additional flags when configured", function() {
             var log_debug = sinon.stub();
             log_debug.withArgs('CFLAGS', [ '_anonymous_', '_something_' ]).returns(true);
-            log_debug.throws("Unexpected logdata");
+            log_debug.throws(new Error("Unexpected logdata"));
             return authprovider.find_config_flags({
                     "config": {
                         "auth": {
@@ -623,7 +719,7 @@ describe('lib: authprovider', function() {
         it("should return the input data with basic + additional flags when configured as well as _self_ set when user asks about himself", function() {
             var log_debug = sinon.stub();
             log_debug.withArgs('CFLAGS', [ '_anonymous_', '_self_', '_something_' ]).returns(true);
-            log_debug.throws("Unexpected logdata");
+            log_debug.throws(new Error("Unexpected logdata"));
             return authprovider.find_config_flags({
                     "config": {
                         "auth": {
@@ -741,7 +837,7 @@ describe('lib: authprovider', function() {
             log_debug.withArgs("MEMBERLOOKUP", { "Kennung3": "rohstatus" }).returns(true);
             log_debug.withArgs("ROHSTATUS", "rohstatus", "REALSTATUS", "somestatus").returns(true);
             log_debug.withArgs('DFLAGS', [ '_anonymous_', '_self_' ]).returns(true);
-            log_debug.throws("Unexpected logdata");
+            log_debug.throws(new Error("Unexpected logdata"));
             return authprovider.find_database_flags({
                     "config": {
                         "auth": {
@@ -805,7 +901,7 @@ describe('lib: authprovider', function() {
             log_debug.withArgs("MEMBERLOOKUP", { "Kennung3": "rohstatus" }).returns(true);
             log_debug.withArgs("ROHSTATUS", "rohstatus", "REALSTATUS", "crew").returns(true);
             log_debug.withArgs('DFLAGS', [ '_anonymous_', '_self_', '_member_' ]).returns(true);
-            log_debug.throws("Unexpected logdata");
+            log_debug.throws(new Error("Unexpected logdata"));
             return authprovider.find_database_flags({
                     "config": {
                         "auth": {
@@ -870,7 +966,7 @@ describe('lib: authprovider', function() {
             log_debug.withArgs("MEMBERLOOKUP", { "Kennung3": "rohstatus" }).returns(true);
             log_debug.withArgs("ROHSTATUS", "rohstatus", "REALSTATUS", "raumfahrer").returns(true);
             log_debug.withArgs('DFLAGS', [ '_anonymous_', '_self_', '_astronaut_' ]).returns(true);
-            log_debug.throws("Unexpected logdata");
+            log_debug.throws(new Error("Unexpected logdata"));
             return authprovider.find_database_flags({
                     "config": {
                         "auth": {
@@ -935,7 +1031,7 @@ describe('lib: authprovider', function() {
             log_debug.withArgs("MEMBERLOOKUP", { "Kennung3": "rohstatus" }).returns(true);
             log_debug.withArgs("ROHSTATUS", "rohstatus", "REALSTATUS", "passiv").returns(true);
             log_debug.withArgs('DFLAGS', [ '_anonymous_', '_self_', '_passive_' ]).returns(true);
-            log_debug.throws("Unexpected logdata");
+            log_debug.throws(new Error("Unexpected logdata"));
             return authprovider.find_database_flags({
                     "config": {
                         "auth": {
@@ -1062,7 +1158,7 @@ describe('lib: authprovider', function() {
         it("should return the input data impersonating otheruser if requestor has _admin_ flag set", function() {
             var log_debug = sinon.stub();
             log_debug.withArgs("IMPERSONATE", "otheruser").returns(true);
-            log_debug.throws("Unexpected logdata");
+            log_debug.throws(new Error("Unexpected logdata"));
             var passeddata = {
                     "request": {
                         "query": {
@@ -1119,7 +1215,7 @@ describe('lib: authprovider', function() {
         it("should return the input data impersonating otheruser if requestor has _board_ flag set", function() {
             var log_debug = sinon.stub();
             log_debug.withArgs("IMPERSONATE", "otheruser").returns(true);
-            log_debug.throws("Unexpected logdata");
+            log_debug.throws(new Error("Unexpected logdata"));
             var passeddata = {
                     "request": {
                         "query": {
@@ -1194,7 +1290,7 @@ describe('lib: authprovider', function() {
         it("should return a UnauthorizedError when no permissions are found", function() {
             var log_debug = sinon.stub();
             log_debug.withArgs("PERMISSION", undefined).returns(true);
-            log_debug.throws("Unexpected logdata");
+            log_debug.throws(new Error("Unexpected logdata"));
             return authprovider.effective_permissions({
                 "request": {
                     "log": {
@@ -1219,7 +1315,7 @@ describe('lib: authprovider', function() {
         it("should return the input data with the anonymous permissions set when none other can be found", function() {
             var log_debug = sinon.stub();
             log_debug.withArgs("PERMISSION", { "permission_based_variable_for": "anonymous", "level": 254 }).returns(true);
-            log_debug.throws("Unexpected logdata");
+            log_debug.throws(new Error("Unexpected logdata"));
             var passeddata = {
                 "request": {
                     "log": {
@@ -1268,7 +1364,7 @@ describe('lib: authprovider', function() {
         it("should return the input data with the lowest-level permission found set", function() {
             var log_debug = sinon.stub();
             log_debug.withArgs("PERMISSION", { "permission_based_variable_for": "someflag", "level": 10 }).returns(true);
-            log_debug.throws("Unexpected logdata");
+            log_debug.throws(new Error("Unexpected logdata"));
             var passeddata = {
                 "request": {
                     "log": {
