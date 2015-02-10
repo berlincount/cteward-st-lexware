@@ -74,14 +74,14 @@ $(document).ready(function() {
       series_keys = Object.keys(series).sort()
       if (series_keys.length == 8)
         series_keys = [
-          "Fördermitglied",
-          "Member (Ruhend)",
-          "Member (Sonder)",
-          "Member (Sozial)",
-          "Member (Regulär)",
-          "Member (Förder)",
-          "Member (Megaförder)",
           "Firmenmitglied",
+          "Member (Megaförder)",
+          "Member (Förder)",
+          "Member (Regulär)",
+          "Member (Sozial)",
+          "Member (Sonder)",
+          "Member (Ruhend)",
+          "Fördermitglied",
         ];
       for (var i=0; i < series_keys.length; i++) {
         options.series.push(series[series_keys[i]]);
