@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html>
 <head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
 <title>c-base - Unauthoritative member statistics</title>
 <script src="//code.jquery.com/jquery-1.11.2.min.js"></script>
 <script src="//code.highcharts.com/highcharts.js"></script>
 <script src="//code.highcharts.com/modules/data.js"></script>
 <script src="//code.highcharts.com/modules/exporting.js"></script>
-
+</head>
+<body>
 <div id="container" style="width: 100%; margin: 0 auto"></div>
 
 <script type="text/javascript">
@@ -44,11 +46,14 @@ $(document).ready(function() {
     success: function(data) {
       var series = [];
       for (var i=0; i < data.length; i++) {
-        series.push([ Date.parse(String(data[i].Year)+"-"+String(data[i].Month)+"-28"), data[i].Members]);
+        series.push([ Date.parse(String(data[i].Year)+"-"+(data[i].Month < 10 ? "0"+String(data[i].Month):String(data[i].Month))+"-28"), data[i].Members]);
       }
       options.series[0].data = series;
+      console.log(options);
       var chart = new Highcharts.Chart(options);
     }
     });
 });
 </script>
+</body>
+</html>

@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html>
 <head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
 <title>c-base - Unauthoritative member statistics</title>
 <script src="//code.jquery.com/jquery-1.11.2.min.js"></script>
 <script src="//code.highcharts.com/highcharts.js"></script>
 <script src="//code.highcharts.com/modules/data.js"></script>
 <script src="//code.highcharts.com/modules/exporting.js"></script>
-
+</head>
+<body>
 <div id="container" style="width: 100%; margin: 0 auto"></div>
 
 <script type="text/javascript">
@@ -62,11 +64,11 @@ $(document).ready(function() {
           continue;
         for (var j=0; j < data[i].Contracts.length; j++)
           if (data[i].Contracts[j].Type in series) {
-            series[data[i].Contracts[j].Type].data.push([ Date.parse(String(data[i].Year)+"-"+String(data[i].Month)+"-28"), data[i].Contracts[j].Count]);
+            series[data[i].Contracts[j].Type].data.push([ Date.parse(String(data[i].Year)+"-"+(data[i].Month < 10 ? "0"+String(data[i].Month):String(data[i].Month))+"-28"), data[i].Contracts[j].Count]);
           } else {
             series[data[i].Contracts[j].Type] = {
               name: data[i].Contracts[j].Type,
-              data: [[ Date.parse(String(data[i].Year)+"-"+String(data[i].Month)+"-28"), data[i].Contracts[j].Count]]
+              data: [[ Date.parse(String(data[i].Year)+"-"+(data[i].Month < 10 ? "0"+String(data[i].Month):String(data[i].Month))+"-28"), data[i].Contracts[j].Count]]
           }
         }
       }
@@ -86,8 +88,11 @@ $(document).ready(function() {
       for (var i=0; i < series_keys.length; i++) {
         options.series.push(series[series_keys[i]]);
       }
+      console.log(options);
       var chart = new Highcharts.Chart(options);
     }
     });
 });
 </script>
+</body>
+</html>
