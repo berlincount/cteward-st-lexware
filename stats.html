@@ -7,20 +7,10 @@
 <script src="//code.highcharts.com/modules/data.js"></script>
 <script src="//code.highcharts.com/modules/exporting.js"></script>
 
-<!-- Additional files for the Highslide popup effect -->
-<!--<script type="text/javascript" src="//www.highcharts.com/media/com_demo/highslide-full.min.js"></script>
-<script type="text/javascript" src="//www.highcharts.com/media/com_demo/highslide.config.js" charset="utf-8"></script>
-<link rel="stylesheet" type="text/css" href="//www.highcharts.com/media/com_demo/highslide.css" />
--->
-
-<div id="container" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+<div id="container" style="width: 100%; margin: 0 auto"></div>
 
 <script type="text/javascript">
 $(document).ready(function() {
-  /*
-  var username = window.prompt("c-base username?");
-  var password = window.prompt("c-base password?");
-  */
   var options = {
     title: {
       text: 'c-base members'
@@ -38,7 +28,7 @@ $(document).ready(function() {
     },
     chart: {
       renderTo: 'container',
-      type: 'spline'
+      type: 'areaspline'
     },
     tooltip: {
       formatter: function() {
@@ -51,14 +41,6 @@ $(document).ready(function() {
   $.ajax({
     dataType: "json",
     url: 'https://vorstand.c-base.org/cteward-api/legacy/stats/members?callback=?',
-    /*
-    beforeSend: function setAuthHeader(xhr) {
-      var creds = username + ':' + password;
-      var basicScheme = btoa(creds);
-      var hashStr = "Basic "+basicScheme;
-      xhr.setRequestHeader('Authorization', hashStr);
-    },
-    */
     success: function(data) {
       var series = [];
       for (var i=0; i < data.length; i++) {
@@ -70,4 +52,3 @@ $(document).ready(function() {
     });
 });
 </script>
-

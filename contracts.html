@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>c-base - Unauthoritative member statistics</title>
+<script src="//code.jquery.com/jquery-1.11.2.min.js"></script>
+<script src="//code.highcharts.com/highcharts.js"></script>
+<script src="//code.highcharts.com/modules/data.js"></script>
+<script src="//code.highcharts.com/modules/exporting.js"></script>
+
+<div id="container" style="width: 100%; margin: 0 auto"></div>
+
+<script type="text/javascript">
+$(document).ready(function() {
+  var options = {
+    title: {
+      text: 'c-base members'
+    },
+    subtitle: {
+      text: 'Unauthoritative statistics'
+    },
+    xAxis: {
+      gridLineWidth: 1,
+      type: 'datetime'
+    },
+    yAxis: {
+      gridLineWidth: 1,
+      min: 0
+    },
+    chart: {
+      renderTo: 'container',
+      type: 'area'
+    },
+    tooltip: {
+      shared: true,
+      formatter: function() {
+        var s = '<b>' + Highcharts.dateFormat("%b %Y", this.x, true) + '</b>';
+        $.each(this.points, function () {
+          s += '<br/>' + this.series.name + ': ' +this.y + ' Members';
+        });
+        return s;
+      }
+    },
+    plotOptions: {
+      area: {
+        stacking: 'normal',
+        marker: {
+          enabled: false
+        }
+      }
+    },
+    series: [{name: 'Members'}]
+  };
+
+  $.ajax({
+    dataType: "json",
+    url: 'https://vorstand.c-base.org/cteward-api/legacy/stats/contracts?callback=?',
+    success: function(data) {
+    var today = new Date();
+    var series = {};
+      for (var i=0; i < data.length; i++) {
+      if (data[i].Year > today.getFullYear() || (data[i].Year == today.getFullYear() && data[i].Month > today.getMonth()+1))
+          continue;
+        for (var j=0; j < data[i].Contracts.length; j++)
+          if (data[i].Contracts[j].Type in series) {
+            series[data[i].Contracts[j].Type].data.push([ Date.parse(String(data[i].Year)+"-"+String(data[i].Month)+"-28"), data[i].Contracts[j].Count]);
+          } else {
+            series[data[i].Contracts[j].Type] = {
+              name: data[i].Contracts[j].Type,
+              data: [[ Date.parse(String(data[i].Year)+"-"+String(data[i].Month)+"-28"), data[i].Contracts[j].Count]]
+          }
+        }
+      }
+      options.series = []
+      series_keys = Object.keys(series).sort()
+      if (series_keys.length == 8)
+        series_keys = [
+          "Fördermitglied",
+          "Member (Ruhend)",
+          "Member (Sonder)",
+          "Member (Sozial)",
+          "Member (Regulär)",
+          "Member (Förder)",
+          "Member (Megaförder)",
+          "Firmenmitglied",
+        ];
+      for (var i=0; i < series_keys.length; i++) {
+        options.series.push(series[series_keys[i]]);
+      }
+      var chart = new Highcharts.Chart(options);
+    }
+    });
+});
+</script>
