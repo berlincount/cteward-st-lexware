@@ -46,7 +46,7 @@ $(document).ready(function() {
     success: function(data) {
       var series = [];
       for (var i=0; i < data.length; i++) {
-        series.push([ Date.parse(String(data[i].Year)+"-"+(data[i].Month < 10 ? "0"+String(data[i].Month):String(data[i].Month))+"-28"), data[i].Members]);
+        series.push([ (new Date(data[i].Year, data[i].Month, 28)).getTime(), data[i].Members]);
       }
       options.series[0].data = series;
       console.log(options);
