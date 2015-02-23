@@ -391,6 +391,7 @@ $(document).ready(function() {
 
         if (data[i].Year == today.getFullYear() && data[i].Month == today.getMonth()+1) {
           age_areaseries_keys.sort();
+          age_areaseries_keys.reverse();
 
           var cooked_data = [];
           if (topnam)
@@ -409,6 +410,7 @@ $(document).ready(function() {
 
       age_areaoptions.series = [];
       age_areaseries_keys.sort();
+      age_areaseries_keys.reverse();
 
       if (topnam)
         age_areaseries_keys.unshift(topnam);
