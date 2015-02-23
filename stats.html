@@ -80,7 +80,7 @@ $(document).ready(function() {
       pie: {
         dataLabels: {
           enabled: true,
-          format: '<b>{point.name}</b>: {point.percentage:.1f}% ({point.y})',
+          format: '<b>{point.name}</b>: {point.y} ({point.percentage:.1f}%)',
         }
       }
     }
@@ -144,7 +144,7 @@ $(document).ready(function() {
       pie: {
         dataLabels: {
           enabled: true,
-          format: '<b>{point.name}</b>: {point.percentage:.1f}% ({point.y})',
+          format: '<b>{point.name}</b>: {point.y} ({point.percentage:.1f}%)',
         }
       }
     }
@@ -208,7 +208,7 @@ $(document).ready(function() {
       pie: {
         dataLabels: {
           enabled: true,
-          format: '<b>{point.name}</b>: {point.percentage:.1f}% ({point.y})',
+          format: '<b>{point.name}</b>: {point.y} ({point.percentage:.1f}%)',
         }
       }
     }
@@ -273,9 +273,9 @@ $(document).ready(function() {
         ];
       for (var i=0; i < contract_pieseries_keys.length; i++) {
         if (contract_pieseries[contract_pieseries_keys[i]])
-          contract_pieoptions.series[0].data.push([ contract_pieseries_keys[i], contract_pieseries[contract_pieseries_keys[i]]]);
-        else
-          contract_pieoptions.series[0].data.push([ contract_pieseries_keys[i], 0]);
+          contract_pieoptions.series[0].data.push([ contract_pieseries_keys[i].replace(/^Firmenmitglied/,'Business').replace(/^Fördermitglied$/,'5€-Mitglied').replace(/^Member \((.*)\)$/,"$1"), contract_pieseries[contract_pieseries_keys[i]]]);
+        //else
+        //  contract_pieoptions.series[0].data.push([ contract_pieseries_keys[i].replace(/^Firmenmitglied/,'Business').replace(/^Fördermitglied$/,'5€-Mitglied').replace(/^Member \((.*)\)$/,"$1"), 0]);
       }
       //console.log(contract_pieseries);
       //console.log(contract_pieoptions);
@@ -395,11 +395,11 @@ $(document).ready(function() {
 
           var cooked_data = [];
           if (topnam)
-            cooked_data.push([ topnam.replace('>','&gt;').replace('<','&lt;'), top ]);
+            cooked_data.push([ topnam.replace(/ \([<>] [0-9]{4}\)$/,'').replace('>','&gt;').replace('<','&lt;'), top ]);
           for (var j=0; j < age_areaseries_keys.length; j++)
-            cooked_data.push([ age_areaseries_keys[j], data[i][age_areaseries_keys[j]] ]);
+            cooked_data.push([ age_areaseries_keys[j].replace(/ \([0-9]{4}-[0-9]{4}\)$/,''), data[i][age_areaseries_keys[j]] ]);
           if (botnam)
-            cooked_data.push([ botnam.replace('>','&gt;').replace('<','&lt;'), bot ]);
+            cooked_data.push([ botnam.replace(/ \([<>] [0-9]{4}\)$/,'').replace('>','&gt;').replace('<','&lt;'), bot ]);
           if (other)
             cooked_data.push([ 'Other', other ]);
 
