@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<title>c-base - Unauthoritative member statistics</title>
+<script src="//code.jquery.com/jquery-1.11.2.min.js"></script>
+<script src="//code.highcharts.com/highcharts.js"></script>
+<script src="//code.highcharts.com/modules/data.js"></script>
+<script src="//code.highcharts.com/modules/exporting.js"></script>
+</head>
+<body>
+<div id="container" style="width: 100%; margin: 0 auto"></div>
+
+<script type="text/javascript">
+$(document).ready(function() {
+  var options = {
+    title: {
+      text: 'c-base members'
+    },
+    subtitle: {
+      text: 'Unauthoritative statistics'
+    },
+    xAxis: {
+      gridLineWidth: 1,
+      type: 'datetime'
+    },
+    yAxis: {
+      gridLineWidth: 1,
+      min: 0
+    },
+    chart: {
+      renderTo: 'container',
+      type: 'areaspline'
+    },
+    tooltip: {
+      formatter: function() {
+        return Highcharts.dateFormat("%b %Y", this.x, true)+':  '+ this.y + ' Members';
+      }
+    },
+    series: [{name: 'Members'}]
+  };
+
+  $.ajax({
+    dataType: "json",
+    url: 'https://vorstand.c-base.org/cteward-api/legacy/stats/members?callback=?',
+    success: function(data) {
+      var series = [];
+      for (var i=0; i < data.length; i++) {
+        series.push([ (new Date(data[i].Year, data[i].Month, 28)).getTime(), data[i].Members]);
+      }
+      options.series[0].data = series;
+      console.log(options);
+      var chart = new Highcharts.Chart(options);
+    }
+    });
+});
+</script>
+</body>
+</html>

@@ -9,16 +9,25 @@
 <script src="//code.highcharts.com/modules/exporting.js"></script>
 </head>
 <body>
-<div id="container" style="width: 100%; margin: 0 auto"></div>
+<table width=95%>
+    <tr>
+        <td><div id="contract_pie" style="min-width: 310px; height: 400px; max-width: 500px; margin: 0 auto"></div></td>
+        <td><div id="gender_pie" style="min-width: 310px; height: 400px; max-width: 500px; margin: 0 auto"></div></td>
+        <td><div id="age_pie" style="min-width: 310px; height: 400px; max-width: 500px; margin: 0 auto"></div></td>
+    </tr>
+    <tr><td colspan=3><div id="contract_area" style="width: 100%; margin: 0 auto"></div></td></tr>
+    <tr><td colspan=3><div id="gender_area" style="width: 100%; margin: 0 auto"></div></td></tr>
+    <tr><td colspan=3><div id="age_area" style="width: 100%; margin: 0 auto"></div></td></tr>
+</table>
 
 <script type="text/javascript">
 $(document).ready(function() {
-  var options = {
+  var contract_areaoptions = {
     title: {
       text: 'c-base members'
     },
     subtitle: {
-      text: 'Unauthoritative statistics'
+      text: 'Contracts - Unauthoritative statistics'
     },
     xAxis: {
       gridLineWidth: 1,
@@ -29,30 +38,397 @@ $(document).ready(function() {
       min: 0
     },
     chart: {
-      renderTo: 'container',
-      type: 'areaspline'
+      renderTo: 'contract_area',
+      type: 'area'
     },
     tooltip: {
+      shared: true,
       formatter: function() {
-        return Highcharts.dateFormat("%b %Y", this.x, true)+':  '+ this.y + ' Members';
+        var s = '<b>' + Highcharts.dateFormat("%b %Y", this.x, true) + '</b>';
+        $.each(this.points, function () {
+          s += '<br/>' + this.series.name + ': ' +this.y + ' Members';
+        });
+        return s;
+      }
+    },
+    plotOptions: {
+      area: {
+        stacking: 'normal',
+        marker: {
+          enabled: false
+        }
       }
     },
     series: [{name: 'Members'}]
   };
 
+  var contract_pieoptions = {
+    chart: {
+      plotBackgroundColor: null,
+      plotBorderWidth: null,
+      plotShadow: false,
+      renderTo: 'contract_pie',
+      type: 'pie'
+    },
+    title: {
+      text: 'c-base members (today)'
+    },
+    subtitle: {
+      text: 'Contracts - Unauthoritative statistics'
+    },
+    plotOptions: {
+      pie: {
+        dataLabels: {
+          enabled: true,
+          format: '<b>{point.name}</b>: {point.percentage:.1f}% ({point.y})',
+        }
+      }
+    }
+  };
+
+  var gender_areaoptions = {
+    title: {
+      text: 'c-base members'
+    },
+    subtitle: {
+      text: 'Genders - Unauthoritative statistics'
+    },
+    xAxis: {
+      gridLineWidth: 1,
+      type: 'datetime'
+    },
+    yAxis: {
+      gridLineWidth: 1,
+      min: 0
+    },
+    chart: {
+      renderTo: 'gender_area',
+      type: 'area'
+    },
+    tooltip: {
+      shared: true,
+      formatter: function() {
+        var s = '<b>' + Highcharts.dateFormat("%b %Y", this.x, true) + '</b>';
+        $.each(this.points, function () {
+          s += '<br/>' + this.series.name + ': ' +this.y + ' Members';
+        });
+        return s;
+      }
+    },
+    plotOptions: {
+      area: {
+        stacking: 'normal',
+        marker: {
+          enabled: false
+        }
+      }
+    },
+    series: [{name: 'Members'}]
+  };
+
+  var gender_pieoptions = {
+    chart: {
+      plotBackgroundColor: null,
+      plotBorderWidth: null,
+      plotShadow: false,
+      renderTo: 'gender_pie',
+      type: 'pie'
+    },
+    title: {
+      text: 'c-base members (today)'
+    },
+    subtitle: {
+      text: 'Genders - Unauthoritative statistics'
+    },
+    plotOptions: {
+      pie: {
+        dataLabels: {
+          enabled: true,
+          format: '<b>{point.name}</b>: {point.percentage:.1f}% ({point.y})',
+        }
+      }
+    }
+  };
+
+  var age_areaoptions = {
+    title: {
+      text: 'c-base members'
+    },
+    subtitle: {
+      text: 'Ages - Unauthoritative statistics'
+    },
+    xAxis: {
+      gridLineWidth: 1,
+      type: 'datetime'
+    },
+    yAxis: {
+      gridLineWidth: 1,
+      min: 0
+    },
+    chart: {
+      renderTo: 'age_area',
+      type: 'area'
+    },
+    tooltip: {
+      shared: true,
+      formatter: function() {
+        var s = '<b>' + Highcharts.dateFormat("%b %Y", this.x, true) + '</b>';
+        $.each(this.points, function () {
+          s += '<br/>' + this.series.name + ': ' +this.y + ' Members';
+        });
+        return s;
+      }
+    },
+    plotOptions: {
+      area: {
+        stacking: 'normal',
+        marker: {
+          enabled: false
+        }
+      }
+    },
+    series: [{name: 'Members'}]
+  };
+
+  var age_pieoptions = {
+    chart: {
+      plotBackgroundColor: null,
+      plotBorderWidth: null,
+      plotShadow: false,
+      renderTo: 'age_pie',
+      type: 'pie'
+    },
+    title: {
+      text: 'c-base members (today)'
+    },
+    subtitle: {
+      text: 'Ages - Unauthoritative statistics'
+    },
+    plotOptions: {
+      pie: {
+        dataLabels: {
+          enabled: true,
+          format: '<b>{point.name}</b>: {point.percentage:.1f}% ({point.y})',
+        }
+      }
+    }
+  };
+
   $.ajax({
     dataType: "json",
-    url: 'https://vorstand.c-base.org/cteward-api/legacy/stats/members?callback=?',
+    url: 'https://vorstand.c-base.org/cteward-api/legacy/stats/contracts?callback=?',
     success: function(data) {
-      var series = [];
+      var today = new Date();
+      var contract_areaseries = {};
+      var contract_pieseries = {};
       for (var i=0; i < data.length; i++) {
-        series.push([ (new Date(data[i].Year, data[i].Month, 28)).getTime(), data[i].Members]);
+        if (data[i].Year > today.getFullYear() || (data[i].Year == today.getFullYear() && data[i].Month > today.getMonth()+1))
+          continue;
+        if (data[i].Year == today.getFullYear() && data[i].Month == today.getMonth()+1)
+          for (var j=0; j < data[i].Contracts.length; j++) {
+            contract_pieseries[data[i].Contracts[j].Type] = data[i].Contracts[j].Count;
+          }
+        for (var j=0; j < data[i].Contracts.length; j++) {
+          if (data[i].Contracts[j].Type in contract_areaseries) {
+            contract_areaseries[data[i].Contracts[j].Type].data.push([ (new Date(data[i].Year, data[i].Month, 28)).getTime(), data[i].Contracts[j].Count]);
+          } else {
+            contract_areaseries[data[i].Contracts[j].Type] = {
+              name: data[i].Contracts[j].Type,
+              data: [[ (new Date(data[i].Year, data[i].Month, 28)).getTime(), data[i].Contracts[j].Count]]
+            }
+          }
+        }
       }
-      options.series[0].data = series;
-      console.log(options);
-      var chart = new Highcharts.Chart(options);
+      contract_areaoptions.series = [];
+      contract_areaseries_keys = Object.keys(contract_areaseries).sort()
+      if (contract_areaseries_keys.length == 8)
+        contract_areaseries_keys = [
+          "Firmenmitglied",
+          "Member (Megaförder)",
+          "Member (Förder)",
+          "Member (Regulär)",
+          "Member (Sozial)",
+          "Member (Sonder)",
+          "Member (Ruhend)",
+          "Fördermitglied",
+        ];
+      for (var i=0; i < contract_areaseries_keys.length; i++) {
+        contract_areaoptions.series.push(contract_areaseries[contract_areaseries_keys[i]]);
+      }
+      //console.log(contract_areaoptions);
+      var chart = new Highcharts.Chart(contract_areaoptions);
+
+      contract_pieoptions.series = [{ type: 'pie', name: 'Contracts', data: [] }]
+      contract_pieseries_keys = Object.keys(contract_areaseries).sort()
+      if (contract_pieseries_keys.length == 8)
+        contract_pieseries_keys = [
+          "Firmenmitglied",
+          "Member (Megaförder)",
+          "Member (Förder)",
+          "Member (Regulär)",
+          "Member (Sozial)",
+          "Member (Sonder)",
+          "Member (Ruhend)",
+          "Fördermitglied",
+        ];
+      for (var i=0; i < contract_pieseries_keys.length; i++) {
+        if (contract_pieseries[contract_pieseries_keys[i]])
+          contract_pieoptions.series[0].data.push([ contract_pieseries_keys[i], contract_pieseries[contract_pieseries_keys[i]]]);
+        else
+          contract_pieoptions.series[0].data.push([ contract_pieseries_keys[i], 0]);
+      }
+      //console.log(contract_pieseries);
+      //console.log(contract_pieoptions);
+      var contract_pie = new Highcharts.Chart(contract_pieoptions);
     }
-    });
+  });
+
+  $.ajax({
+    dataType: "json",
+    url: 'https://vorstand.c-base.org/cteward-api/legacy/stats/genders?callback=?',
+    success: function(data) {
+      var today = new Date();
+      var gender_areaseries = {
+        'Male':     {
+          'name': 'Male',
+          'data': []
+        },
+        'Female':   {
+          'name': 'Female',
+          'data': []
+        },
+        'Other':    {
+          'name': 'Other',
+          'data': []
+        },
+        'Business': {
+          'name': 'Business',
+          'data': []
+        }
+      };
+      var gender_pieseries = {};
+      //console.log(data);
+      for (var i=0; i < data.length; i++) {
+        if (data[i].Year > today.getFullYear() || (data[i].Year == today.getFullYear() && data[i].Month > today.getMonth()+1))
+          continue;
+        if (data[i].Year == today.getFullYear() && data[i].Month == today.getMonth()+1) {
+          gender_pieoptions.series = [{ type: 'pie', name: 'Members', data: [
+            [ 'Male',     data[i].Male     ],
+            [ 'Female',   data[i].Female   ],
+            [ 'Other',    data[i].Other    ],
+            [ 'Business', data[i].Business ]
+          ] }];
+        }
+        gender_areaseries['Male'].    data.push([ (new Date(data[i].Year, data[i].Month, 28)).getTime(), data[i].Male ]);
+        gender_areaseries['Female'].  data.push([ (new Date(data[i].Year, data[i].Month, 28)).getTime(), data[i].Female ]);
+        gender_areaseries['Other'].   data.push([ (new Date(data[i].Year, data[i].Month, 28)).getTime(), data[i].Other ]);
+        gender_areaseries['Business'].data.push([ (new Date(data[i].Year, data[i].Month, 28)).getTime(), data[i].Business ]);
+      }
+      gender_areaoptions.series = [];
+      gender_areaoptions.series.push(gender_areaseries['Male']);
+      gender_areaoptions.series.push(gender_areaseries['Female']);
+      gender_areaoptions.series.push(gender_areaseries['Other']);
+      gender_areaoptions.series.push(gender_areaseries['Business']);
+      //console.log(gender_areaoptions);
+      var gender_chart = new Highcharts.Chart(gender_areaoptions);
+
+      //console.log(gender_pieoptions);
+      var gender_pie = new Highcharts.Chart(gender_pieoptions);
+    }
+  });
+
+  $.ajax({
+    dataType: "json",
+    url: 'https://vorstand.c-base.org/cteward-api/legacy/stats/ages?callback=?',
+    success: function(data) {
+      var today = new Date();
+      var age_areaseries = {};
+      var age_pieseries = {};
+      //console.log(data);
+      var age_areaseries_keys   = [];
+      var other  = false;
+      var top    = false;
+      var topnam = false;
+      var bot    = false;
+      var botnam = false;
+      for (var i=0; i < data.length; i++) {
+        if (data[i].Year > today.getFullYear() || (data[i].Year == today.getFullYear() && data[i].Month > today.getMonth()+1))
+          continue;
+        for (var key in data[i]) {
+          if (data[i].hasOwnProperty(key)) {
+            if (key == 'Year')
+              continue;
+            if (key == 'Month')
+              continue;
+            if (key in age_areaseries) {
+              age_areaseries[key].data.push([ (new Date(data[i].Year, data[i].Month, 28)).getTime(), data[i][key]]);
+            } else {
+              age_areaseries[key] = {
+                'name': key.replace('>','&gt;').replace('<','&lt;'),
+                'data': [[ (new Date(data[i].Year, data[i].Month, 28)).getTime(), data[i][key]]]
+              };
+            }
+
+            if (key.indexOf('>') === 0) {
+              topnam  = key;
+              top     = data[i][key];
+              continue;
+            }
+            if (key.indexOf('<') === 0) {
+              botnam  = key;
+              bot     = data[i][key];
+              continue;
+            }
+            if (key == 'Other') {
+              other = data[i][key];
+              continue;
+            }
+
+            if (age_areaseries_keys.indexOf(key) < 0)
+              age_areaseries_keys.push(key);
+          }
+        }
+
+        if (data[i].Year == today.getFullYear() && data[i].Month == today.getMonth()+1) {
+          age_areaseries_keys.sort();
+
+          var cooked_data = [];
+          if (topnam)
+            cooked_data.push([ topnam.replace('>','&gt;').replace('<','&lt;'), top ]);
+          for (var j=0; j < age_areaseries_keys.length; j++)
+            cooked_data.push([ age_areaseries_keys[j], data[i][age_areaseries_keys[j]] ]);
+          if (botnam)
+            cooked_data.push([ botnam.replace('>','&gt;').replace('<','&lt;'), bot ]);
+          if (other)
+            cooked_data.push([ 'Other', other ]);
+
+          age_pieoptions.series = [{ type: 'pie', name: 'Members', data: cooked_data }];
+        }
+      }
+
+
+      age_areaoptions.series = [];
+      age_areaseries_keys.sort();
+
+      if (topnam)
+        age_areaseries_keys.unshift(topnam);
+      if (botnam)
+        age_areaseries_keys.push(botnam);
+      if (other)
+        age_areaseries_keys.push('Other');
+
+      console.log(age_areaseries);
+      console.log(age_areaseries_keys);
+      for (var i=0; i < age_areaseries_keys.length; i++) {
+        age_areaoptions.series.push(age_areaseries[age_areaseries_keys[i]]);
+      }
+      console.log(age_areaoptions);
+      var age_chart = new Highcharts.Chart(age_areaoptions);
+
+      console.log(age_pieoptions);
+      var age_pie = new Highcharts.Chart(age_pieoptions);
+    }
+  });
 });
 </script>
 </body>
