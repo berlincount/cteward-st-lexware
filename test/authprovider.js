@@ -1202,6 +1202,9 @@ describe('lib: authprovider', function() {
                     },
                     "username": "otheruser",
                     "flags": [
+                        '_anonymous_',
+                        '_self_',
+                        '_admin_'
                     ],
                     "callorder_test": 2
                 });
@@ -1259,6 +1262,9 @@ describe('lib: authprovider', function() {
                     },
                     "username": "otheruser",
                     "flags": [
+                        '_anonymous_',
+                        '_self_',
+                        '_board_'
                     ],
                     "callorder_test": 2
                 });
