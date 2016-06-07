@@ -2,5 +2,6 @@ node_modules
 coverage.html
 coverage.html.new
 npm-debug.log
+mqtt-poster.lock
 st-lexware-dev.json
 *~
