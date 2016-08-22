@@ -6,6 +6,12 @@
     "auth": {
         "/legacy/*": {
             "count": "dummytest"
+        },
+        "bots": {
+            "testbot": "testpassword"
+        },
+        "flags": {
+            "testbot": [ "_bot_" ]
         }
     },
     "server": {

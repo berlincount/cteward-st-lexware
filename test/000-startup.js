@@ -4,9 +4,6 @@ var os = require('os');
 // logfile simulation
 var fs = require('fs');
 
-// database simulation
-var database = require('../lib/database');
-
 var MemoryStream = require('memorystream');
 var memstream = new MemoryStream();
 memstream_data = [];
@@ -32,7 +29,7 @@ memstream.on('data', function(chunk) {
   if (now - then > 30000 || now - then < 0)
       throw new Error('logging: time of logging seems too far away from now: '+then+' vs '+now);
 
-  if (messagedata.msg !== 'cteward-st-lexware listening at http://0.0.0.0:14334')
+  if (messagedata.msg !== 'cteward-st-lexware listening at http://:::14334')
       memstream_data.push(messagedata.msg);
 });
 var filestub = sinon.stub(fs, 'createWriteStream');
@@ -41,18 +38,12 @@ filestub.withArgs('testlogfile').returns(memstream);
 before(function(done) {
   process.env.CTEWARD_ST_LEXWARE_CONFIG = 'st-lexware-test.json';
 
-  // database simulation
-  database_checkBackendOkay = sinon.stub(database, 'checkBackendOkay');
-
   memstream_data = [];
   require('../lib/startup')();
   done();
 });
 
 after(function(done) {
-  // database simulation
-  database_checkBackendOkay.restore();
-
   if (memstream_data.length !== 0) {
     console.log('unchecked logfile data:');
     console.log(memstream_data);

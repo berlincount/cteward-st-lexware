@@ -1,5 +1,9 @@
 var restify = require('restify');
 var assert = require('assert');
+var sinon = require('sinon');
+
+// database simulation
+var database = require('../lib/database');
 
 // init the test client
 var client = restify.createJsonClient({
@@ -8,6 +12,11 @@ var client = restify.createJsonClient({
 });
 
 describe('service: /legacy/monitor', function() {
+    before(function() {
+      // database simulation
+      database_checkBackendOkay = sinon.stub(database, 'checkBackendOkay');
+    });
+
     describe('200 OK test', function() {
         it('should give a 200 with {"status":"OK"} when everything is okay', function(done) {
             // stub database access
@@ -69,5 +78,10 @@ describe('service: /legacy/monitor', function() {
                 done();
             });
         });
+    });
+
+    after(function() {
+      // database simulation
+      database_checkBackendOkay.restore();
     });
 });

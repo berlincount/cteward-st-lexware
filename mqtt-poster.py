@@ -36,6 +36,8 @@ mqttc.connect(config['mqtt_host'], config['mqtt_port'])
 ## our main loop, update stuff
 while True:
     result = httpc.get(config['legacyurl'], verify='/etc/ssl/CAcert_chain.pem', auth=requests.auth.HTTPBasicAuth(config['username'], config['password']))
+    from pprint import pprint
+    pprint(result)
     if result.status_code != 200:
         print("Something went wrong.")
         sys.exit(1)

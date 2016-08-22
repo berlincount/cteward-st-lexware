@@ -31,10 +31,15 @@ describe('lib: authprovider', function() {
             });
         });
         it("should return the input data as-is when member lookup fails", function() {
+            var expectedError = new Error("SomethingOrOther");
             var database_memberlookup = sinon.stub(database, 'memberlookup',
                 new Promise.method(function test() {
-                    throw new Error("SomethingOrOther");
+                    throw expectedError;
                 }));
+            var log_debug = sinon.stub();
+            log_debug.withArgs('FIND_DATABASE_FLAGS').returns(true);
+            log_debug.withArgs('FIND_DATABASE_FLAGS caught', expectedError, undefined).returns(true);
+            log_debug.throws(new Error("Unexpected logdata"));
             return authprovider.find_database_flags({
                     "config": {
                         "auth": {
@@ -42,7 +47,10 @@ describe('lib: authprovider', function() {
                         }
                     },
                     "request": {
-                        "params": {}
+                        "params": {},
+                        "log": {
+                            "debug": log_debug
+                        }
                     },
                     "username": "testuser"
             })
@@ -54,20 +62,25 @@ describe('lib: authprovider', function() {
                         }
                     },
                     "request": {
-                        "params": {}
+                        "params": {},
+                        "log": {
+                            "debug": log_debug
+                        }
                     },
                     "username": "testuser"
                 });
             })
             .finally(function() {
                 database_memberlookup.restore();
+                assert.equal(log_debug.callCount, 2);
             });
         });
         it("should return the input data without flags being changed for unexpected status", function() {
             var database_memberlookup = sinon.stub(database, 'memberlookup',
-                new Promise.method(function test(username) {
+                new Promise.method(function test(username, v) {
                     assert.equal(username, "testuser");
-                    return { "Kennung3": "rohstatus" };
+                    v.data = { "Kennung3": "rohstatus" };
+                    return v;
                 }));
             var memberdata_realstatus = sinon.stub(memberdata, 'realstatus',
                 function test(data) {
@@ -75,8 +88,9 @@ describe('lib: authprovider', function() {
                     return "somestatus";
                 });
             var log_debug = sinon.stub();
-            log_debug.withArgs("MEMBERLOOKUP", { "Kennung3": "rohstatus" }).returns(true);
-            log_debug.withArgs("ROHSTATUS", "rohstatus", "REALSTATUS", "somestatus").returns(true);
+            log_debug.withArgs('FIND_DATABASE_FLAGS').returns(true);
+            log_debug.withArgs('MEMBERLOOKUP(AUTH)', { "Kennung3": "rohstatus" }).returns(true);
+            log_debug.withArgs('ROHSTATUS', 'rohstatus', 'REALSTATUS', 'somestatus').returns(true);
             log_debug.withArgs('DFLAGS', [ '_anonymous_', '_self_' ]).returns(true);
             log_debug.throws(new Error("Unexpected logdata"));
             return authprovider.find_database_flags({
@@ -94,10 +108,7 @@ describe('lib: authprovider', function() {
                         }
                     },
                     "username": "testuser",
-                    "flags": [
-                        '_anonymous_',
-                        '_self_'
-                    ]
+                    "flags": [ '_anonymous_', '_self_' ]
             })
             .then(function(data) {
                 assert.deepEqual(data,{
@@ -115,23 +126,21 @@ describe('lib: authprovider', function() {
                         }
                     },
                     "username": "testuser",
-                    "flags": [
-                        '_anonymous_',
-                        '_self_'
-                    ]
+                    "flags": [ '_anonymous_', '_self_' ]
                 });
             })
             .finally(function() {
                 database_memberlookup.restore();
                 memberdata_realstatus.restore();
-                assert.equal(log_debug.callCount, 3);
+                assert.equal(log_debug.callCount, 4);
             });
         });
         it("should return the input data with the proper flag being added for a user with realstatus 'crew'", function() {
             var database_memberlookup = sinon.stub(database, 'memberlookup',
-                new Promise.method(function test(username) {
+                new Promise.method(function test(username, v) {
                     assert.equal(username, "testuser");
-                    return { "Kennung3": "rohstatus" };
+                    v.data = { "Kennung3": "rohstatus" };
+                    return v;
                 }));
             var memberdata_realstatus = sinon.stub(memberdata, 'realstatus',
                 function test(data) {
@@ -139,7 +148,8 @@ describe('lib: authprovider', function() {
                     return "crew";
                 });
             var log_debug = sinon.stub();
-            log_debug.withArgs("MEMBERLOOKUP", { "Kennung3": "rohstatus" }).returns(true);
+            log_debug.withArgs('FIND_DATABASE_FLAGS').returns(true);
+            log_debug.withArgs("MEMBERLOOKUP(AUTH)", { "Kennung3": "rohstatus" }).returns(true);
             log_debug.withArgs("ROHSTATUS", "rohstatus", "REALSTATUS", "crew").returns(true);
             log_debug.withArgs('DFLAGS', [ '_anonymous_', '_self_', '_member_' ]).returns(true);
             log_debug.throws(new Error("Unexpected logdata"));
@@ -189,14 +199,15 @@ describe('lib: authprovider', function() {
             .finally(function() {
                 database_memberlookup.restore();
                 memberdata_realstatus.restore();
-                assert.equal(log_debug.callCount, 3);
+                assert.equal(log_debug.callCount, 4);
             });
         });
         it("should return the input data with the proper flag being added for a user with realstatus 'raumfahrer'", function() {
             var database_memberlookup = sinon.stub(database, 'memberlookup',
-                new Promise.method(function test(username) {
+                new Promise.method(function test(username, v) {
                     assert.equal(username, "testuser");
-                    return { "Kennung3": "rohstatus" };
+                    v.data = { "Kennung3": "rohstatus" };
+                    return v;
                 }));
             var memberdata_realstatus = sinon.stub(memberdata, 'realstatus',
                 function test(data) {
@@ -204,7 +215,8 @@ describe('lib: authprovider', function() {
                     return "raumfahrer";
                 });
             var log_debug = sinon.stub();
-            log_debug.withArgs("MEMBERLOOKUP", { "Kennung3": "rohstatus" }).returns(true);
+            log_debug.withArgs('FIND_DATABASE_FLAGS').returns(true);
+            log_debug.withArgs("MEMBERLOOKUP(AUTH)", { "Kennung3": "rohstatus" }).returns(true);
             log_debug.withArgs("ROHSTATUS", "rohstatus", "REALSTATUS", "raumfahrer").returns(true);
             log_debug.withArgs('DFLAGS', [ '_anonymous_', '_self_', '_astronaut_' ]).returns(true);
             log_debug.throws(new Error("Unexpected logdata"));
@@ -254,14 +266,15 @@ describe('lib: authprovider', function() {
             .finally(function() {
                 database_memberlookup.restore();
                 memberdata_realstatus.restore();
-                assert.equal(log_debug.callCount, 3);
+                assert.equal(log_debug.callCount, 4);
             });
         });
         it("should return the input data with the proper flag being added for a user with realstatus 'passiv'", function() {
             var database_memberlookup = sinon.stub(database, 'memberlookup',
-                new Promise.method(function test(username) {
+                new Promise.method(function test(username, v) {
                     assert.equal(username, "testuser");
-                    return { "Kennung3": "rohstatus" };
+                    v.data = { "Kennung3": "rohstatus" };
+                    return v;
                 }));
             var memberdata_realstatus = sinon.stub(memberdata, 'realstatus',
                 function test(data) {
@@ -269,10 +282,11 @@ describe('lib: authprovider', function() {
                     return "passiv";
                 });
             var log_debug = sinon.stub();
-            log_debug.withArgs("MEMBERLOOKUP", { "Kennung3": "rohstatus" }).returns(true);
-            log_debug.withArgs("ROHSTATUS", "rohstatus", "REALSTATUS", "passiv").returns(true);
+            log_debug.withArgs('FIND_DATABASE_FLAGS').returns(true);
+            log_debug.withArgs('MEMBERLOOKUP(AUTH)', { 'Kennung3': 'rohstatus' }).returns(true);
+            log_debug.withArgs('ROHSTATUS', 'rohstatus', 'REALSTATUS', 'passiv').returns(true);
             log_debug.withArgs('DFLAGS', [ '_anonymous_', '_self_', '_passive_' ]).returns(true);
-            log_debug.throws(new Error("Unexpected logdata"));
+            log_debug.throws(new Error('Unexpected logdata'));
             return authprovider.find_database_flags({
                     "config": {
                         "auth": {
@@ -319,7 +333,7 @@ describe('lib: authprovider', function() {
             .finally(function() {
                 database_memberlookup.restore();
                 memberdata_realstatus.restore();
-                assert.equal(log_debug.callCount, 3);
+                assert.equal(log_debug.callCount, 4);
             });
         });
     });
