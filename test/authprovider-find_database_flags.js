@@ -32,7 +32,7 @@ describe('lib: authprovider', function() {
         });
         it("should return the input data as-is when member lookup fails", function() {
             var expectedError = new Error("SomethingOrOther");
-            var database_memberlookup = sinon.stub(database, 'memberlookup',
+            var database_memberlookup = sinon.stub(database, 'memberlookup').callsFake(
                 new Promise.method(function test() {
                     throw expectedError;
                 }));
@@ -76,13 +76,13 @@ describe('lib: authprovider', function() {
             });
         });
         it("should return the input data without flags being changed for unexpected status", function() {
-            var database_memberlookup = sinon.stub(database, 'memberlookup',
+            var database_memberlookup = sinon.stub(database, 'memberlookup').callsFake(
                 new Promise.method(function test(username, v) {
                     assert.equal(username, "testuser");
                     v.data = { "Kennung3": "rohstatus" };
                     return v;
                 }));
-            var memberdata_realstatus = sinon.stub(memberdata, 'realstatus',
+            var memberdata_realstatus = sinon.stub(memberdata, 'realstatus').callsFake(
                 function test(data) {
                     assert.deepEqual(data, { "Kennung3": "rohstatus" });
                     return "somestatus";
@@ -136,13 +136,13 @@ describe('lib: authprovider', function() {
             });
         });
         it("should return the input data with the proper flag being added for a user with realstatus 'crew'", function() {
-            var database_memberlookup = sinon.stub(database, 'memberlookup',
+            var database_memberlookup = sinon.stub(database, 'memberlookup').callsFake(
                 new Promise.method(function test(username, v) {
                     assert.equal(username, "testuser");
                     v.data = { "Kennung3": "rohstatus" };
                     return v;
                 }));
-            var memberdata_realstatus = sinon.stub(memberdata, 'realstatus',
+            var memberdata_realstatus = sinon.stub(memberdata, 'realstatus').callsFake(
                 function test(data) {
                     assert.deepEqual(data, { "Kennung3": "rohstatus" });
                     return "crew";
@@ -203,13 +203,13 @@ describe('lib: authprovider', function() {
             });
         });
         it("should return the input data with the proper flag being added for a user with realstatus 'raumfahrer'", function() {
-            var database_memberlookup = sinon.stub(database, 'memberlookup',
+            var database_memberlookup = sinon.stub(database, 'memberlookup').callsFake(
                 new Promise.method(function test(username, v) {
                     assert.equal(username, "testuser");
                     v.data = { "Kennung3": "rohstatus" };
                     return v;
                 }));
-            var memberdata_realstatus = sinon.stub(memberdata, 'realstatus',
+            var memberdata_realstatus = sinon.stub(memberdata, 'realstatus').callsFake(
                 function test(data) {
                     assert.deepEqual(data, { "Kennung3": "rohstatus" });
                     return "raumfahrer";
@@ -270,13 +270,13 @@ describe('lib: authprovider', function() {
             });
         });
         it("should return the input data with the proper flag being added for a user with realstatus 'passiv'", function() {
-            var database_memberlookup = sinon.stub(database, 'memberlookup',
+            var database_memberlookup = sinon.stub(database, 'memberlookup').callsFake(
                 new Promise.method(function test(username, v) {
                     assert.equal(username, "testuser");
                     v.data = { "Kennung3": "rohstatus" };
                     return v;
                 }));
-            var memberdata_realstatus = sinon.stub(memberdata, 'realstatus',
+            var memberdata_realstatus = sinon.stub(memberdata, 'realstatus').callsFake(
                 function test(data) {
                     assert.deepEqual(data, { "Kennung3": "rohstatus" });
                     return "passiv";

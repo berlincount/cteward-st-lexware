@@ -64,42 +64,42 @@ describe('lib: authprovider', function() {
                 }
             };
 
-            var authprovider_find_botuser          = sinon.stub(authprovider, 'find_botuser',
+            var authprovider_find_botuser          = sinon.stub(authprovider, 'find_botuser').callsFake(
                 new Promise.method(function test(data) {
                     assert.equal(data, passeddata);
                     assert.equal(data.callorder_test, undefined);
                     data.callorder_test = 0;
                     return data;
                 }));
-            var authprovider_find_ldapuser         = sinon.stub(authprovider, 'find_ldapuser',
+            var authprovider_find_ldapuser         = sinon.stub(authprovider, 'find_ldapuser').callsFake(
                 new Promise.method(function test(data) {
                     assert.equal(data, passeddata);
                     assert.equal(data.callorder_test, 0);
                     data.callorder_test++;
                     return data;
                 }));
-            var authprovider_find_config_flags     = sinon.stub(authprovider, 'find_config_flags',
+            var authprovider_find_config_flags     = sinon.stub(authprovider, 'find_config_flags').callsFake(
                 new Promise.method(function test(data) {
                     assert.equal(data, passeddata);
                     assert.equal(data.callorder_test, 1);
                     data.callorder_test++;
                     return data;
                 }));
-            var authprovider_find_database_flags   = sinon.stub(authprovider, 'find_database_flags',
+            var authprovider_find_database_flags   = sinon.stub(authprovider, 'find_database_flags').callsFake(
                 new Promise.method(function test(data) {
                     assert.equal(data, passeddata);
                     assert.equal(data.callorder_test, 2);
                     data.callorder_test++;
                     return data;
                 }));
-            var authprovider_impersonate           = sinon.stub(authprovider, 'impersonate',
+            var authprovider_impersonate           = sinon.stub(authprovider, 'impersonate').callsFake(
                 new Promise.method(function test(data) {
                     assert.equal(data, passeddata);
                     assert.equal(data.callorder_test, 3);
                     data.callorder_test++;
                     return data;
                 }));
-            var authprovider_effective_permissions = sinon.stub(authprovider, 'effective_permissions',
+            var authprovider_effective_permissions = sinon.stub(authprovider, 'effective_permissions').callsFake(
                 new Promise.method(function test(data) {
                     assert.equal(data, passeddata);
                     assert.equal(data.callorder_test, 4);

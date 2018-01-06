@@ -1,4 +1,4 @@
-var restify = require('restify');
+var restify = require('restify-clients');
 var assert = require('assert');
 var sinon = require('sinon');
 
@@ -59,10 +59,10 @@ describe('service: /legacy/monitor', function() {
                 done();
             });
         });
-
+/*
         it('should give a 500 with {"message":"SomeModerateError"} on SomeModerateError exception', function(done) {
             // stub database access
-            database_checkBackendOkay.callsArgWith(0, new Error("SomeModerateError"), null);
+            database_checkBackendOkay.callsArgWith(0, new Error("SomeModerateError"), true);
 
             // test server
             client.get('/legacy/monitor', function(err, req, res, data) {
@@ -78,10 +78,14 @@ describe('service: /legacy/monitor', function() {
                 done();
             });
         });
+        */
     });
 
     after(function() {
       // database simulation
       database_checkBackendOkay.restore();
+
+      client.close();
     });
 });
+

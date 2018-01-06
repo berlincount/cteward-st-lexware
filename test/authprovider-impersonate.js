@@ -105,14 +105,14 @@ describe('lib: authprovider', function() {
                         '_admin_'
                     ]
             };
-            var authprovider_find_config_flags     = sinon.stub(authprovider, 'find_config_flags',
+            var authprovider_find_config_flags     = sinon.stub(authprovider, 'find_config_flags').callsFake(
                 new Promise.method(function test(data) {
                     assert.equal(data, passeddata);
                     assert.equal(data.callorder_test, undefined);
                     data.callorder_test = 1;
                     return data;
                 }));
-            var authprovider_find_database_flags   = sinon.stub(authprovider, 'find_database_flags',
+            var authprovider_find_database_flags   = sinon.stub(authprovider, 'find_database_flags').callsFake(
                 new Promise.method(function test(data) {
                     assert.equal(data, passeddata);
                     assert.equal(data.callorder_test, 1);
@@ -165,14 +165,14 @@ describe('lib: authprovider', function() {
                         '_board_'
                     ]
             };
-            var authprovider_find_config_flags     = sinon.stub(authprovider, 'find_config_flags',
+            var authprovider_find_config_flags     = sinon.stub(authprovider, 'find_config_flags').callsFake(
                 new Promise.method(function test(data) {
                     assert.equal(data, passeddata);
                     assert.equal(data.callorder_test, undefined);
                     data.callorder_test = 1;
                     return data;
                 }));
-            var authprovider_find_database_flags   = sinon.stub(authprovider, 'find_database_flags',
+            var authprovider_find_database_flags   = sinon.stub(authprovider, 'find_database_flags').callsFake(
                 new Promise.method(function test(data) {
                     assert.equal(data, passeddata);
                     assert.equal(data.callorder_test, 1);

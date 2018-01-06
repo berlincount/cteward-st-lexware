@@ -1,8 +1,12 @@
+//// open-handle dumper
+//var wtf = require('wtfnode');
+
 var sinon = require('sinon');
 var os = require('os');
 
 // logfile simulation
 var fs = require('fs');
+
 
 var MemoryStream = require('memorystream');
 var memstream = new MemoryStream();
@@ -29,17 +33,18 @@ memstream.on('data', function(chunk) {
   if (now - then > 30000 || now - then < 0)
       throw new Error('logging: time of logging seems too far away from now: '+then+' vs '+now);
 
-  if (messagedata.msg !== 'cteward-st-lexware listening at http://:::14334')
+  if (messagedata.msg !== 'cteward-st-lexware listening at http://[::]:14334')
       memstream_data.push(messagedata.msg);
 });
 var filestub = sinon.stub(fs, 'createWriteStream');
 filestub.withArgs('testlogfile').returns(memstream);
 
+var server;
 before(function(done) {
   process.env.CTEWARD_ST_LEXWARE_CONFIG = 'st-lexware-test.json';
 
   memstream_data = [];
-  require('../lib/startup')();
+  server = require('../lib/startup')();
   done();
 });
 
@@ -49,6 +54,12 @@ after(function(done) {
     console.log(memstream_data);
     throw new Error('unchecked logfile data ('+memstream_data.length+' lines)');
   }
+
+  server.close();
+
+  //// dump handlers etc still open
+  //wtf.dump();
+
   done();
 });
 
